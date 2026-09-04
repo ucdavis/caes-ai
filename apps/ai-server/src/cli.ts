@@ -72,17 +72,17 @@ function printKey(result: { applicationId: string; keyId: string; apiKey: string
 function printHelp(): void {
   console.log(`CAES AI administration
 
-  pnpm caes-ai app create <id> --callback-url <url> --origin <url> --model <model> [--display-name <name>] [--max-reasoning <effort>]
-  pnpm caes-ai app update <id> [--callback-url <url>] [--origin <url>] [--model <model>] [--display-name <name>] [--max-reasoning <effort>]
-  pnpm caes-ai app list
-  pnpm caes-ai app rotate-key <id> [--label <label>]
-  pnpm caes-ai app revoke-key <id> <key-id>
-  pnpm caes-ai app enable <id>
-  pnpm caes-ai app disable <id>
-  pnpm caes-ai signing-key list
-  pnpm caes-ai signing-key rotate
-  pnpm caes-ai signing-key retire <kid>
-  pnpm caes-ai db migrate`);
+  npm run caes-ai -- app create <id> --callback-url <url> --origin <url> --model <model> [--display-name <name>] [--max-reasoning <effort>]
+  npm run caes-ai -- app update <id> [--callback-url <url>] [--origin <url>] [--model <model>] [--display-name <name>] [--max-reasoning <effort>]
+  npm run caes-ai -- app list
+  npm run caes-ai -- app rotate-key <id> [--label <label>]
+  npm run caes-ai -- app revoke-key <id> <key-id>
+  npm run caes-ai -- app enable <id>
+  npm run caes-ai -- app disable <id>
+  npm run caes-ai -- signing-key list
+  npm run caes-ai -- signing-key rotate
+  npm run caes-ai -- signing-key retire <kid>
+  npm run caes-ai -- db migrate`);
 }
 
 async function runSigningKeyCommand(command: string | undefined, positionals: string[]) {
@@ -113,7 +113,7 @@ async function runSigningKeyCommand(command: string | undefined, positionals: st
     console.log(`Retired callback signing key ${kid}. Restart CAES AI to republish JWKS.`);
     return;
   }
-  throw new Error("Unknown signing-key command. Run pnpm caes-ai help for usage.");
+  throw new Error("Unknown signing-key command. Run npm run caes-ai -- help for usage.");
 }
 
 async function run(): Promise<void> {
@@ -142,7 +142,7 @@ async function run(): Promise<void> {
       return;
     }
     if (area !== "app" || !command) {
-      throw new Error("Unknown command. Run pnpm caes-ai help for usage.");
+      throw new Error("Unknown command. Run npm run caes-ai -- help for usage.");
     }
 
     const admin = new ApplicationAdminService(
@@ -222,7 +222,7 @@ async function run(): Promise<void> {
       console.log(`${command === "enable" ? "Enabled" : "Disabled"} ${id}.`);
       return;
     }
-    throw new Error("Unknown command. Run pnpm caes-ai help for usage.");
+    throw new Error("Unknown command. Run npm run caes-ai -- help for usage.");
   } finally {
     await closeDatabase(database);
   }

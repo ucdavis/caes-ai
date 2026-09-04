@@ -14,11 +14,11 @@ replay a response without repeating the write.
 Run commands from the repository root after the [native setup](../../../../README.md#native-setup):
 
 ```bash
-pnpm exec dotenv -e .env -- dotnet run --project apps/todo-app/api/UCDavis.CaesAi.Todo.Api
+npm exec -- dotenv -e .env -- dotnet run --project apps/todo-app/api/UCDavis.CaesAi.Todo.Api
 ```
 
 The local HTTP profile listens on port 5180; `/health` reports liveness. Assistant
-session creation also needs the configured central server. `pnpm dev` starts both
+session creation also needs the configured central server. `npm run dev` starts both
 services and the frontend together.
 
 Configuration uses `ConnectionStrings:Todos` and the SDK's `CaesAi` section. The

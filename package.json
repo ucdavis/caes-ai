@@ -2,34 +2,42 @@
   "name": "caes-ai",
   "version": "0.1.0",
   "private": true,
-  "packageManager": "pnpm@10.11.0",
+  "packageManager": "npm@11.19.1",
   "engines": {
-    "node": ">=22"
+    "node": ">=22",
+    "npm": "^11.19.1"
   },
   "scripts": {
-    "build": "pnpm -r --if-present build && dotnet build apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
-    "build:packages": "pnpm --filter @ucdavis/caes-ai-protocol build && pnpm --filter @ucdavis/caes-ai-assistant-react build",
+    "build": "npm run build --workspaces --if-present && npm run build:dotnet",
+    "build:dotnet": "dotnet build apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
+    "build:packages": "npm run build --workspace @ucdavis/caes-ai-protocol --workspace @ucdavis/caes-ai-assistant-react",
     "changeset": "changeset",
-    "check": "pnpm build:packages && pnpm typecheck && pnpm --filter @ucdavis/caes-ai-server db:check && pnpm lint && pnpm test && dotnet format apps/todo-app/UCDavis.CaesAi.Todo.slnx --verify-no-changes --no-restore && dotnet build apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore && dotnet test apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-build",
-    "caes-ai": "dotenv -e .env -- pnpm --filter @ucdavis/caes-ai-server caes-ai",
-    "db:migrate": "pnpm caes-ai db migrate",
-    "db:setup": "dotenv -e .env -- pnpm --filter @ucdavis/caes-ai-server db:bootstrap-todo",
+    "check": "npm run deps:check && npm run build:packages && npm run typecheck && npm run db:check && npm run lint && npm test && npm run format:check",
+    "caes-ai": "dotenv -e .env -- npm run caes-ai --workspace @ucdavis/caes-ai-server --",
+    "db:check": "npm run db:check --workspace @ucdavis/caes-ai-server",
+    "db:migrate": "npm run caes-ai -- db migrate",
+    "db:setup": "dotenv -e .env -- npm run db:bootstrap-todo --workspace @ucdavis/caes-ai-server",
     "db:up": "docker compose up -d postgres",
-    "dev": "dotenv -e .env -- concurrently -k -n ai,todo-api,web -c cyan,green,magenta \"pnpm --filter @ucdavis/caes-ai-server dev\" \"dotnet watch --project apps/todo-app/api/UCDavis.CaesAi.Todo.Api\" \"pnpm --filter @ucdavis/caes-ai-todo-web dev\"",
+    "deps:check": "npm ls --all",
+    "dev": "dotenv -e .env -- concurrently -k -n ai,todo-api,web -c cyan,green,magenta \"npm run dev --workspace @ucdavis/caes-ai-server\" \"dotnet watch --project apps/todo-app/api/UCDavis.CaesAi.Todo.Api\" \"npm run dev --workspace @ucdavis/caes-ai-todo-web\"",
     "format": "eslint . --fix && dotnet format apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
+    "format:check": "dotnet format apps/todo-app/UCDavis.CaesAi.Todo.slnx --verify-no-changes --no-restore",
     "lint": "eslint .",
-    "pack:assistant": "mkdir -p artifacts && pnpm --filter @ucdavis/caes-ai-assistant-react pack --pack-destination artifacts",
+    "pack:assistant": "mkdir -p artifacts && npm pack --workspace @ucdavis/caes-ai-assistant-react --pack-destination artifacts",
     "pack:dotnet": "mkdir -p artifacts && dotnet pack packages/UCDavis.CaesAi.AppSdk/UCDavis.CaesAi.AppSdk.csproj --configuration Release --output artifacts",
-    "pack:protocol": "mkdir -p artifacts && pnpm --filter @ucdavis/caes-ai-protocol pack --pack-destination artifacts",
-    "release:publish": "pnpm build:packages && changeset publish",
-    "release:version": "changeset version && pnpm install --lockfile-only",
-    "predev": "pnpm build:packages && pnpm db:up && pnpm db:setup",
-    "pretest:e2e": "pnpm build:packages",
-    "test": "pnpm --filter '!@ucdavis/caes-ai-e2e' -r --if-present test && dotnet test apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
-    "test:e2e": "pnpm --filter @ucdavis/caes-ai-e2e test",
+    "pack:protocol": "mkdir -p artifacts && npm pack --workspace @ucdavis/caes-ai-protocol --pack-destination artifacts",
+    "release:publish": "npm run build:packages && changeset publish",
+    "release:version": "changeset version && npm install --package-lock-only",
+    "predev": "npm run build:packages && npm run db:up && npm run db:setup",
+    "pretest:e2e": "npm run build:packages",
+    "pretest:js": "npm run build:packages",
+    "test": "npm run test:js && npm run test:dotnet",
+    "test:dotnet": "dotnet test apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
+    "test:js": "npm run test --workspace @ucdavis/caes-ai-protocol --workspace @ucdavis/caes-ai-assistant-react --workspace @ucdavis/caes-ai-server --workspace @ucdavis/caes-ai-todo-web",
+    "test:e2e": "npm run test --workspace @ucdavis/caes-ai-e2e --",
     "test:db:up": "docker compose --env-file /dev/null -f compose.test.yml up -d --wait",
     "test:db:down": "docker compose --env-file /dev/null -f compose.test.yml down --volumes",
-    "typecheck": "pnpm -r --if-present typecheck"
+    "typecheck": "npm run typecheck --workspaces --if-present"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.1",
@@ -37,8 +45,19 @@
     "@types/node": "^22.19.7",
     "concurrently": "^9.2.1",
     "dotenv-cli": "^11.0.0",
+    "esbuild": "^0.28.2",
     "eslint": "^9.39.1",
     "typescript": "^6.0.2",
     "typescript-eslint": "^8.46.2"
+  },
+  "workspaces": [
+    "packages/protocol",
+    "packages/assistant-react",
+    "apps/ai-server",
+    "apps/todo-app/web",
+    "tests/e2e"
+  ],
+  "overrides": {
+    "@tanstack/openai-base": "0.10.8"
   }
 }

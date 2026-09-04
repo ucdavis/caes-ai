@@ -15,6 +15,6 @@ Run from the repository root after restoring the solution:
 dotnet test packages/UCDavis.CaesAi.AppSdk.Tests --no-restore
 ```
 
-The project is included in `apps/todo-app/UCDavis.CaesAi.Todo.slnx` and `pnpm check`.
+The project is included in `apps/todo-app/UCDavis.CaesAi.Todo.slnx` and `npm run check`.
 Application-specific callback dispatch and mutation replay are covered separately
 by the [Todo API tests](../../apps/todo-app/api/UCDavis.CaesAi.Todo.Api.IntegrationTests/README.md).

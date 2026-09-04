@@ -15,8 +15,8 @@ directly from CAES AI; it does not receive an application or provider API key.
 Run commands from the repository root after installing dependencies:
 
 ```bash
-pnpm build:packages
-pnpm --filter @ucdavis/caes-ai-todo-web dev
+npm run build:packages
+npm run dev --workspace @ucdavis/caes-ai-todo-web
 ```
 
 Vite listens on port 5173 and proxies `/api` and `/health` to the Todo API on port
@@ -24,8 +24,8 @@ Vite listens on port 5173 and proxies `/api` and `/health` to the Todo API on po
 backends as well. The Compose frontend is served by nginx on localhost port 8080.
 
 ```bash
-pnpm --filter @ucdavis/caes-ai-todo-web test
-pnpm --filter @ucdavis/caes-ai-todo-web build
+npm run test --workspace @ucdavis/caes-ai-todo-web
+npm run build --workspace @ucdavis/caes-ai-todo-web
 ```
 
 Vitest runs the component test in jsdom with mocked API calls. The separate

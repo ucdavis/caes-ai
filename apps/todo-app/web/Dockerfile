@@ -1,18 +1,19 @@
 FROM node:22-alpine AS build
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@10.11.0 --activate
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+RUN npm install --global npm@11.19.1
+COPY package.json package-lock.json tsconfig.base.json ./
+COPY apps/ai-server/package.json apps/ai-server/package.json
 COPY apps/todo-app/web/package.json apps/todo-app/web/package.json
 COPY packages/assistant-react/package.json packages/assistant-react/package.json
 COPY packages/protocol/package.json packages/protocol/package.json
-RUN pnpm install --frozen-lockfile --filter @ucdavis/caes-ai-todo-web... --filter @ucdavis/caes-ai-assistant-react... --filter @ucdavis/caes-ai-protocol...
+COPY tests/e2e/package.json tests/e2e/package.json
+RUN npm ci --workspace @ucdavis/caes-ai-protocol --workspace @ucdavis/caes-ai-assistant-react --workspace @ucdavis/caes-ai-todo-web --include-workspace-root
 COPY apps/todo-app/web apps/todo-app/web
 COPY packages/assistant-react packages/assistant-react
 COPY packages/protocol packages/protocol
 COPY contracts contracts
-RUN pnpm --filter @ucdavis/caes-ai-protocol build \
-    && pnpm --filter @ucdavis/caes-ai-assistant-react build \
-    && pnpm --filter @ucdavis/caes-ai-todo-web build
+RUN npm run build --workspace @ucdavis/caes-ai-protocol \
+    --workspace @ucdavis/caes-ai-assistant-react --workspace @ucdavis/caes-ai-todo-web
 
 FROM nginx:1.29-alpine AS runtime
 COPY apps/todo-app/web/nginx.conf /etc/nginx/conf.d/default.conf

@@ -48,23 +48,37 @@ The browser never receives an application key, callback JWT, context-signing key
 ## Requirements
 
 - Node.js 22+
-- pnpm 10.11 (Corepack is fine)
+- npm 11.19.1, matching CI and Docker builds
 - .NET SDK 10
 - Chromium installed by Playwright for the browser test
 - Docker Desktop or another Compose implementation. PostgreSQL runs in Docker for native and containerized development.
+
+If your Node installation includes a different npm version, run
+`npm install --global npm@11.19.1` once. Corepack is not required.
+
+The root `package.json` lists npm workspaces in build order: protocol, React
+package, AI server, Todo frontend and E2E tests. Keep dependencies before their
+consumers when adding a workspace. Internal package dependencies use normal
+version ranges, and npm links matching local workspaces during installation.
+
+The npm override keeps `@tanstack/openai-base` at the previously tested 0.10.8.
+Version 0.10.10 requires TanStack AI 0.53, beyond the current 0.52 provider contract.
+Update that override with the TanStack AI packages when upgrading the provider.
+The root esbuild development dependency supplies Vite's build peer; Drizzle keeps
+its older esbuild dependency separately.
 
 ## Native setup
 
 ```bash
 cp .env.example .env
 # Add OPENAI_API_KEY to .env.
-pnpm install --frozen-lockfile
+npm ci
 dotnet restore apps/todo-app/UCDavis.CaesAi.Todo.slnx
-pnpm --filter @ucdavis/caes-ai-e2e exec playwright install chromium
-pnpm dev
+npm exec --workspace @ucdavis/caes-ai-e2e -- playwright install chromium
+npm run dev
 ```
 
-`pnpm dev` starts the PostgreSQL container, applies checked-in migrations, idempotently creates the local Todo registration, and starts the applications. It always uses OpenAI's Responses API and requires `OPENAI_API_KEY`. Open <http://localhost:5173>. The central service is at <http://localhost:4310>, the Todo API is at <http://localhost:5180>, and PostgreSQL is exposed on port 54329.
+`npm run dev` starts the PostgreSQL container, applies checked-in migrations, idempotently creates the local Todo registration, and starts the applications. It always uses OpenAI's Responses API and requires `OPENAI_API_KEY`. Open <http://localhost:5173>. The central service is at <http://localhost:4310>, the Todo API is at <http://localhost:5180>, and PostgreSQL is exposed on port 54329.
 
 ## Docker Compose
 
@@ -117,7 +131,7 @@ The trusted application registry is in PostgreSQL. `applications` stores callbac
 Create an application with a fixed callback, one or more browser origins, and its model policy:
 
 ```bash
-pnpm caes-ai app create walter \
+npm run caes-ai -- app create walter \
   --display-name "Walter" \
   --callback-url https://walter.example.edu/api/ai/tools/execute \
   --origin https://walter.example.edu \
@@ -128,12 +142,12 @@ pnpm caes-ai app create walter \
 The command prints the new API key once. CAES AI stores its key ID and hash. Operational commands do not print key material:
 
 ```bash
-pnpm caes-ai app list
-pnpm caes-ai app update walter --model gpt-5.6-luna --model gpt-5.6-sol
-pnpm caes-ai app rotate-key walter --label september-rotation
-pnpm caes-ai app revoke-key walter <old-key-id>
-pnpm caes-ai app disable walter
-pnpm caes-ai app enable walter
+npm run caes-ai -- app list
+npm run caes-ai -- app update walter --model gpt-5.6-luna --model gpt-5.6-sol
+npm run caes-ai -- app rotate-key walter --label september-rotation
+npm run caes-ai -- app revoke-key walter <old-key-id>
+npm run caes-ai -- app disable walter
+npm run caes-ai -- app enable walter
 ```
 
 `rotate-key` leaves the prior key active so the application can switch without downtime. Revoke it after the application uses the replacement. Each command applies pending migrations before changing data.
@@ -141,10 +155,10 @@ pnpm caes-ai app enable walter
 Callback signing keys have a separate overlap workflow:
 
 ```bash
-pnpm caes-ai signing-key list
-pnpm caes-ai signing-key rotate
+npm run caes-ai -- signing-key list
+npm run caes-ai -- signing-key rotate
 # Restart CAES AI, then wait beyond callback JWT lifetime and app JWKS caches.
-pnpm caes-ai signing-key retire <old-kid>
+npm run caes-ai -- signing-key retire <old-kid>
 # Restart CAES AI again.
 ```
 
@@ -182,7 +196,7 @@ Set `CAES_AI_OTEL_ENABLED=true` and `OTEL_EXPORTER_OTLP_ENDPOINT` to export trac
 
 ## Adding another application
 
-1. Run `pnpm caes-ai app create` with the application's fixed callback, origins, model allowlist, and reasoning ceiling. Save the one-time API key in the application's secret configuration.
+1. Run `npm run caes-ai -- app create` with the application's fixed callback, origins, model allowlist, and reasoning ceiling. Save the one-time API key in the application's secret configuration.
 2. Configure the application ID and the callback issuer it expects. The application ID must match the database registration.
 3. Reference `UCDavis.CaesAi.AppSdk`, register it with `AddCaesAiAppSdk`, and create a session definition containing the authenticated user reference, instructions, and current tool manifest.
 4. Implement `ICaesAiToolDispatcher` with an explicit application-owned dispatch table, then map the authenticated callback with `MapCaesAiToolCallback`.
@@ -197,13 +211,13 @@ Checks use an isolated PostgreSQL database and scripted model providers. They re
 no OpenAI credential and never bootstrap the demo. For local checks on macOS or Linux:
 
 ```bash
-pnpm install --frozen-lockfile
+npm ci
 dotnet restore apps/todo-app/UCDavis.CaesAi.Todo.slnx
-pnpm test:db:up
+npm run test:db:up
 export CAES_AI_TEST_DATABASE_URL=postgresql://caesai_test:caes-ai-test-password@127.0.0.1:54330/caesai_test
-pnpm check
-pnpm build
-pnpm test:db:down
+npm run check
+npm run build
+npm run test:db:down
 ```
 
 The test database uses its own Compose project, localhost port 54330 and temporary
@@ -211,18 +225,21 @@ storage. Its setup command ignores the local `.env`. Tests fail if
 `CAES_AI_TEST_DATABASE_URL` is unset, so they cannot silently select the demo database.
 The GitHub Actions workflow supplies an ephemeral PostgreSQL service and runs the
 same checks, application builds and package creation on pull requests and `main`.
+CI shows JavaScript/PostgreSQL tests and .NET tests as separate steps. Locally,
+`npm run test:js` runs the four ordinary JavaScript suites, and `npm run test:dotnet`
+runs the SDK and API tests. The live E2E workspace is excluded from both.
 
-`pnpm pack:protocol`, `pnpm pack:assistant` and `pnpm pack:dotnet` create inspectable
-npm and NuGet artifacts without publishing. `pnpm test:e2e` is separate, starts the
+`npm run pack:protocol`, `npm run pack:assistant` and `npm run pack:dotnet` create inspectable
+npm and NuGet artifacts without publishing. `npm run test:e2e` is separate, starts the
 demo when needed and uses a live provider credential. See
 [manual-test.md](docs/manual-test.md) for that check.
 
 Publishable JavaScript package changes use [Changesets](.changeset/README.md) to record release notes and requested version bumps:
 
 ```bash
-pnpm changeset
-pnpm release:version
-pnpm release:publish
+npm run changeset
+npm run release:version
+npm run release:publish
 ```
 
 Versioning and publishing remain separate, explicit operations. `@tanstack/ai`, `@tanstack/ai-react`, React, and React DOM are peers of the React package rather than bundled framework copies.

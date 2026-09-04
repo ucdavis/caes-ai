@@ -1,11 +1,14 @@
 # GitHub automation
 
 [ci.yml](workflows/ci.yml) runs on pull requests, pushes to `main`, and manual
-dispatch. It installs Node.js, pnpm and .NET, then runs `pnpm check`, application
-builds and all three local package commands. It neither publishes packages nor
-deploys the service.
+dispatch. It installs Node.js, npm 11.19.1 and .NET, verifies dependency compatibility, then runs application builds,
+type, migration, lint and formatting checks, tests and all three local package
+commands. These are the same checks available through `npm run check` and
+`npm run build`, with separate CI steps so failures are easy to find. It neither
+publishes packages nor deploys the service.
 
-The job's PostgreSQL service is used by four tests in
+The **Test JavaScript packages and PostgreSQL persistence** step runs
+`npm run test:js`. Its AI server suite uses the job's PostgreSQL service for four tests in
 [application-registry.database.test.ts](../apps/ai-server/test/application-registry.database.test.ts):
 
 - Application registration and hashed API-key persistence.

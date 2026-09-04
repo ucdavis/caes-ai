@@ -8,11 +8,10 @@ The generated filenames are just identifiers.
 
 Run these commands from the repository root:
 
-- `pnpm changeset` creates a release note to commit with a package change.
-- `pnpm release:version` consumes pending notes, updates package versions and internal dependency ranges, and writes changelogs.
-- `pnpm release:publish` builds and publishes package versions that have not yet been published. This is a separate, explicit release operation.
+- `npm run changeset` creates a release note to commit with a package change.
+- `npm run release:version` consumes pending notes, updates package versions and internal dependency ranges, and writes changelogs.
+- `npm run release:publish` builds and publishes package versions that have not yet been published. This is a separate, explicit release operation.
 
 CI only builds, tests and packs packages. It does not run either release command.
 The private applications are excluded by `config.json`; NuGet versioning remains in
-the .NET project file. Changesets can also be used with npm if the repository later
-switches package managers.
+the .NET project file. Changesets uses the same npm workspaces as the rest of the repository.

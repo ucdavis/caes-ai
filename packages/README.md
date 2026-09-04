@@ -11,8 +11,8 @@ The packages contain no Todo business logic. Hosts provide tools, authorization,
 renderers and business services. The [versioned contracts](../contracts/README.md)
 are shared between TypeScript and .NET.
 
-From the repository root, `pnpm build:packages` builds both JavaScript packages.
-`pnpm pack:protocol`, `pnpm pack:assistant` and `pnpm pack:dotnet` write local package
+From the repository root, `npm run build:packages` builds both JavaScript packages.
+`npm run pack:protocol`, `npm run pack:assistant` and `npm run pack:dotnet` write local package
 artifacts without publishing. [Changesets](../.changeset/README.md) manages version
 bumps and changelogs for the JavaScript packages; the .NET version is defined in its
 project file.

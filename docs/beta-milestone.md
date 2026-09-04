@@ -45,8 +45,8 @@ operational records and public errors stay sanitized. See the
 
 ## Foundation validation
 
-On September 4, 2026, the beta checkout passed `pnpm check` with 209 tests,
-`pnpm build`, and all three package commands. The missing-test-database path was
+On September 4, 2026, the initial beta checkout passed full verification with 209 tests,
+application builds, and all three package commands. The missing-test-database path was
 also checked: database tests stop before connecting when the explicit URL is absent.
 The local test database was created and removed through the documented commands.
 The GitHub Actions workflow passed actionlint. Hosted CI, live OpenAI E2E and Azure

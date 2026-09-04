@@ -28,7 +28,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@ucdavis/caes-ai-protocol": "workspace:^",
+    "@ucdavis/caes-ai-protocol": "^0.1.0",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"
   },

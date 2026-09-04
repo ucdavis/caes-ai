@@ -12,7 +12,7 @@ reauthorize the current user when a tool executes.
 ## Run
 
 From the repository root, complete the [native setup](../../README.md#native-setup)
-and run `pnpm dev`. Open `http://localhost:5173`; the API listens on port 5180 and
+and run `npm run dev`. Open `http://localhost:5173`; the API listens on port 5180 and
 CAES AI on port 4310. The [Compose setup](../../README.md#docker-compose) provides
 the same example at `http://localhost:8080`.
 
