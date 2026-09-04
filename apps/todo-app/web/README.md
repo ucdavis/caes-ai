@@ -1,0 +1,32 @@
+# Todo frontend
+
+A React/Vite application with TanStack Query and the shared CAES AI assistant.
+It demonstrates ordinary Todo operations alongside an assistant drawer and inline
+assistant, application-owned result renderers, a client-side filter tool and typed
+query-invalidation effects.
+
+`src/App.tsx` connects sessions, tools and UI effects. `src/renderers.tsx` owns the
+Todo list, summary and item presentations. `src/api.ts` calls the Todo backend.
+The browser gets a short-lived assistant session from that backend and streams chat
+directly from CAES AI; it does not receive an application or provider API key.
+
+## Develop and test
+
+Run commands from the repository root after installing dependencies:
+
+```bash
+pnpm build:packages
+pnpm --filter @ucdavis/caes-ai-todo-web dev
+```
+
+Vite listens on port 5173 and proxies `/api` and `/health` to the Todo API on port
+5180. Use the [full-stack setup](../../../README.md#native-setup) to start both
+backends as well. The Compose frontend is served by nginx on localhost port 8080.
+
+```bash
+pnpm --filter @ucdavis/caes-ai-todo-web test
+pnpm --filter @ucdavis/caes-ai-todo-web build
+```
+
+Vitest runs the component test in jsdom with mocked API calls. The separate
+[E2E suite](../../../tests/e2e/README.md) tests real services in Chromium.

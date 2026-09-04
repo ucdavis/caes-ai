@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/api/">
+    <Project Path="api/UCDavis.CaesAi.Todo.Api.IntegrationTests/UCDavis.CaesAi.Todo.Api.IntegrationTests.csproj" />
+    <Project Path="api/UCDavis.CaesAi.Todo.Api/UCDavis.CaesAi.Todo.Api.csproj" />
+  </Folder>
+  <Folder Name="/packages/">
+    <Project Path="../../packages/UCDavis.CaesAi.AppSdk.Tests/UCDavis.CaesAi.AppSdk.Tests.csproj" />
+    <Project Path="../../packages/UCDavis.CaesAi.AppSdk/UCDavis.CaesAi.AppSdk.csproj" />
+  </Folder>
+</Solution>

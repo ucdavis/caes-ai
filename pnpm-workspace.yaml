@@ -1,0 +1,5 @@
+packages:
+  - apps/ai-server
+  - apps/todo-app/web
+  - packages/*
+  - tests/e2e

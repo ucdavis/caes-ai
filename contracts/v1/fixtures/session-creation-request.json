@@ -1,0 +1,38 @@
+{
+  "protocolVersion": 1,
+  "userReference": "fixture-user",
+  "contextToken": "fixture-context-token",
+  "instructions": "Use tools for current application data.",
+  "modelPolicy": {
+    "requestedModel": null,
+    "defaultReasoningEffort": "low",
+    "maximumReasoningEffort": "medium",
+    "allowPerTurnOverride": true
+  },
+  "tools": [
+    {
+      "name": "read_items",
+      "description": "Returns the current items.",
+      "execution": "server",
+      "risk": "read",
+      "needsApproval": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "dataSchema": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" }
+        },
+        "required": ["count"],
+        "additionalProperties": false
+      },
+      "presentation": {
+        "kind": "item-summary",
+        "label": "Item summary"
+      }
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+name: caes-ai
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: caesai
+      POSTGRES_PASSWORD: ${CAES_AI_POSTGRES_PASSWORD:-caes-ai-local-password}
+      POSTGRES_USER: caesai
+    ports:
+      - "54329:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U caesai -d caesai"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  setup:
+    build:
+      context: .
+      dockerfile: apps/ai-server/Dockerfile
+    working_dir: /app/apps/ai-server
+    command: ["node", "--import", "tsx", "scripts/dev/bootstrap-todo.ts"]
+    environment:
+      CAES_AI_ALLOWED_ORIGINS: http://localhost:8080,http://127.0.0.1:8080
+      CAES_AI_TODO_GATEWAY_URL: http://todo-api:8080/api/ai/tools/execute
+      CAES_AI_ALLOW_INSECURE_CALLBACKS: "true"
+      DATABASE_URL: postgresql://caesai:${CAES_AI_POSTGRES_PASSWORD:-caes-ai-local-password}@postgres:5432/caesai
+      OPENAI_ALLOWED_MODELS: ${OPENAI_ALLOWED_MODELS:-gpt-5.6-luna,gpt-5.6-terra,gpt-5.6-sol}
+      TODO_APP_API_KEY: ${TODO_APP_API_KEY:-caesai_app_0123456789abcdef_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  ai-server:
+    build:
+      context: .
+      dockerfile: apps/ai-server/Dockerfile
+    environment:
+      CAES_AI_MAX_REASONING_EFFORT: ${CAES_AI_MAX_REASONING_EFFORT:-high}
+      CAES_AI_PUBLIC_BASE_URL: http://localhost:4310
+      CAES_AI_CALLBACK_ISSUER: http://ai-server:4310
+      CAES_AI_CALLBACK_SIGNING_KEYS_PATH: /var/lib/caes-ai/callback-signing-keys.json
+      CAES_AI_ALLOW_INSECURE_CALLBACKS: "true"
+      CAES_AI_MODEL_PROFILE_DEFAULT: ${CAES_AI_MODEL_PROFILE_DEFAULT:-gpt-5.6-luna}
+      CAES_AI_MODEL_PROFILE_FAST: ${CAES_AI_MODEL_PROFILE_FAST:-gpt-5.6-luna}
+      CAES_AI_MODEL_PROFILE_DEEP: ${CAES_AI_MODEL_PROFILE_DEEP:-gpt-5.6-terra}
+      DATABASE_URL: postgresql://caesai:${CAES_AI_POSTGRES_PASSWORD:-caes-ai-local-password}@postgres:5432/caesai
+      OPENAI_ALLOWED_MODELS: ${OPENAI_ALLOWED_MODELS:-gpt-5.6-luna,gpt-5.6-terra,gpt-5.6-sol}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      OPENAI_DEFAULT_MODEL: ${OPENAI_DEFAULT_MODEL:-gpt-5.6-luna}
+      CAES_AI_OTEL_ENABLED: ${CAES_AI_OTEL_ENABLED:-false}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-caes-ai}
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+    ports:
+      - "4310:4310"
+    volumes:
+      - callback-signing-keys:/var/lib/caes-ai
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:4310/ready"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  todo-api:
+    build:
+      context: .
+      dockerfile: apps/todo-app/api/Dockerfile
+    environment:
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__Todos: Data Source=/data/caes-ai-todos.db
+      CaesAi__ApplicationId: todo-app
+      CaesAi__ApplicationApiKey: ${TODO_APP_API_KEY:-caesai_app_0123456789abcdef_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA}
+      CaesAi__CallbackIssuer: http://ai-server:4310
+      CaesAi__ContextSigningKey: ${CAES_AI_CONTEXT_SIGNING_KEY:-caes-ai-compose-context-signing-key-at-least-32-bytes}
+      CaesAi__DefaultReasoningEffort: none
+      CaesAi__MaximumReasoningEffort: none
+      CaesAi__Model: ${TODO_AI_MODEL:-}
+      CaesAi__ServerUrl: http://ai-server:4310
+    depends_on:
+      ai-server:
+        condition: service_healthy
+    ports:
+      - "5180:8080"
+    volumes:
+      - todo-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://127.0.0.1:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  todo-web:
+    build:
+      context: .
+      dockerfile: apps/todo-app/web/Dockerfile
+    depends_on:
+      todo-api:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  callback-signing-keys:
+  postgres-data:
+  todo-data:

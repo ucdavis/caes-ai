@@ -1,0 +1,44 @@
+{
+  "name": "caes-ai",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "pnpm -r --if-present build && dotnet build apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
+    "build:packages": "pnpm --filter @ucdavis/caes-ai-protocol build && pnpm --filter @ucdavis/caes-ai-assistant-react build",
+    "changeset": "changeset",
+    "check": "pnpm build:packages && pnpm typecheck && pnpm --filter @ucdavis/caes-ai-server db:check && pnpm lint && pnpm test && dotnet format apps/todo-app/UCDavis.CaesAi.Todo.slnx --verify-no-changes --no-restore && dotnet build apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore && dotnet test apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-build",
+    "caes-ai": "dotenv -e .env -- pnpm --filter @ucdavis/caes-ai-server caes-ai",
+    "db:migrate": "pnpm caes-ai db migrate",
+    "db:setup": "dotenv -e .env -- pnpm --filter @ucdavis/caes-ai-server db:bootstrap-todo",
+    "db:up": "docker compose up -d postgres",
+    "dev": "dotenv -e .env -- concurrently -k -n ai,todo-api,web -c cyan,green,magenta \"pnpm --filter @ucdavis/caes-ai-server dev\" \"dotnet watch --project apps/todo-app/api/UCDavis.CaesAi.Todo.Api\" \"pnpm --filter @ucdavis/caes-ai-todo-web dev\"",
+    "format": "eslint . --fix && dotnet format apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
+    "lint": "eslint .",
+    "pack:assistant": "mkdir -p artifacts && pnpm --filter @ucdavis/caes-ai-assistant-react pack --pack-destination artifacts",
+    "pack:dotnet": "mkdir -p artifacts && dotnet pack packages/UCDavis.CaesAi.AppSdk/UCDavis.CaesAi.AppSdk.csproj --configuration Release --output artifacts",
+    "pack:protocol": "mkdir -p artifacts && pnpm --filter @ucdavis/caes-ai-protocol pack --pack-destination artifacts",
+    "release:publish": "pnpm build:packages && changeset publish",
+    "release:version": "changeset version && pnpm install --lockfile-only",
+    "predev": "pnpm build:packages && pnpm db:up && pnpm db:setup",
+    "pretest:e2e": "pnpm build:packages",
+    "test": "pnpm --filter '!@ucdavis/caes-ai-e2e' -r --if-present test && dotnet test apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
+    "test:e2e": "pnpm --filter @ucdavis/caes-ai-e2e test",
+    "test:db:up": "docker compose --env-file /dev/null -f compose.test.yml up -d --wait",
+    "test:db:down": "docker compose --env-file /dev/null -f compose.test.yml down --volumes",
+    "typecheck": "pnpm -r --if-present typecheck"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^3.0.1",
+    "@eslint/js": "^9.39.1",
+    "@types/node": "^22.19.7",
+    "concurrently": "^9.2.1",
+    "dotenv-cli": "^11.0.0",
+    "eslint": "^9.39.1",
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.46.2"
+  }
+}
