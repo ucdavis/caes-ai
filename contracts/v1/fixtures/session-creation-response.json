@@ -1,0 +1,40 @@
+{
+  "protocolVersion": 1,
+  "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+  "accessToken": "fixture-browser-session-token-that-is-long-enough",
+  "expiresAt": "2026-09-03T19:30:00Z",
+  "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+  "modelPolicy": {
+    "model": "fixture-model",
+    "defaultReasoningEffort": "low",
+    "maximumReasoningEffort": "medium",
+    "allowedReasoningEfforts": ["none", "low", "medium"]
+  },
+  "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "tools": [
+    {
+      "name": "read_items",
+      "description": "Returns the current items.",
+      "execution": "server",
+      "risk": "read",
+      "needsApproval": false,
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "dataSchema": {
+        "type": "object",
+        "properties": {
+          "count": { "type": "integer" }
+        },
+        "required": ["count"],
+        "additionalProperties": false
+      },
+      "presentation": {
+        "kind": "item-summary",
+        "label": "Item summary"
+      }
+    }
+  ]
+}

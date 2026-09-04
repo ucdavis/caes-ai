@@ -1,0 +1,2574 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://caes.ucdavis.edu/ai/contracts/v1/protocol.schema.json",
+  "title": "CAES AI protocol version 1",
+  "$defs": {
+    "protocolVersion": {
+      "const": 1
+    },
+    "reasoningEffort": {
+      "type": "string",
+      "enum": [
+        "none",
+        "minimal",
+        "low",
+        "medium",
+        "high",
+        "xhigh",
+        "max"
+      ]
+    },
+    "jsonObjectSchema": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "const": "object"
+        }
+      }
+    },
+    "toolPresentation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9-]{0,63}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "applicationToolManifest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "execution",
+        "risk",
+        "needsApproval",
+        "inputSchema",
+        "dataSchema"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024,
+          "pattern": "\\S"
+        },
+        "execution": {
+          "type": "string",
+          "enum": [
+            "server",
+            "client"
+          ]
+        },
+        "risk": {
+          "type": "string",
+          "enum": [
+            "read",
+            "write",
+            "ui"
+          ]
+        },
+        "needsApproval": {
+          "type": "boolean"
+        },
+        "inputSchema": {
+          "$ref": "#/$defs/jsonObjectSchema"
+        },
+        "dataSchema": {
+          "$ref": "#/$defs/jsonObjectSchema"
+        },
+        "presentation": {
+          "$ref": "#/$defs/toolPresentation"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "risk": {
+                "const": "write"
+              }
+            },
+            "required": [
+              "risk"
+            ]
+          },
+          "then": {
+            "properties": {
+              "needsApproval": {
+                "const": true
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "execution": {
+                "const": "client"
+              }
+            },
+            "required": [
+              "execution"
+            ]
+          },
+          "then": {
+            "properties": {
+              "risk": {
+                "enum": [
+                  "read",
+                  "ui"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "modelPolicyRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestedModel",
+        "defaultReasoningEffort",
+        "maximumReasoningEffort",
+        "allowPerTurnOverride"
+      ],
+      "properties": {
+        "requestedModel": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "defaultReasoningEffort": {
+          "$ref": "#/$defs/reasoningEffort"
+        },
+        "maximumReasoningEffort": {
+          "$ref": "#/$defs/reasoningEffort"
+        },
+        "allowPerTurnOverride": {
+          "type": "boolean"
+        }
+      }
+    },
+    "effectiveModelPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "model",
+        "defaultReasoningEffort",
+        "maximumReasoningEffort",
+        "allowedReasoningEfforts"
+      ],
+      "properties": {
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "defaultReasoningEffort": {
+          "$ref": "#/$defs/reasoningEffort"
+        },
+        "maximumReasoningEffort": {
+          "$ref": "#/$defs/reasoningEffort"
+        },
+        "allowedReasoningEfforts": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/reasoningEffort"
+          }
+        }
+      }
+    },
+    "sessionCreationRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "userReference",
+        "contextToken",
+        "instructions",
+        "modelPolicy",
+        "tools"
+      ],
+      "properties": {
+        "protocolVersion": {
+          "$ref": "#/$defs/protocolVersion"
+        },
+        "userReference": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "\\S"
+        },
+        "contextToken": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 8192
+        },
+        "instructions": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 16384,
+          "pattern": "\\S"
+        },
+        "modelPolicy": {
+          "$ref": "#/$defs/modelPolicyRequest"
+        },
+        "tools": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/applicationToolManifest"
+          }
+        }
+      }
+    },
+    "sessionCreationResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "sessionId",
+        "accessToken",
+        "expiresAt",
+        "chatUrl",
+        "modelPolicy",
+        "toolManifestHash",
+        "tools"
+      ],
+      "properties": {
+        "protocolVersion": {
+          "$ref": "#/$defs/protocolVersion"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "accessToken": {
+          "type": "string",
+          "minLength": 32
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "chatUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "modelPolicy": {
+          "$ref": "#/$defs/effectiveModelPolicy"
+        },
+        "toolManifestHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "tools": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "#/$defs/applicationToolManifest"
+          }
+        }
+      }
+    },
+    "chatRequestEnvelope": {
+      "type": "object",
+      "properties": {
+        "protocolVersion": {
+          "type": "number",
+          "const": 1
+        },
+        "threadId": {
+          "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+        },
+        "runId": {
+          "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+        },
+        "parentRunId": {
+          "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+        },
+        "state": {},
+        "messages": {
+          "maxItems": 512,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema1"
+          }
+        },
+        "tools": {
+          "maxItems": 32,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema8"
+          }
+        },
+        "context": {
+          "maxItems": 64,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema9"
+          }
+        },
+        "forwardedProps": {
+          "type": "object",
+          "properties": {
+            "reasoningEffort": {
+              "type": "string",
+              "enum": [
+                "none",
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ]
+            }
+          },
+          "additionalProperties": false
+        },
+        "resume": {
+          "maxItems": 64,
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema10"
+          }
+        }
+      },
+      "required": [
+        "protocolVersion",
+        "threadId",
+        "runId",
+        "messages",
+        "tools",
+        "context"
+      ],
+      "additionalProperties": false,
+      "$defs": {
+        "__schema0": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "__schema1": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+                },
+                "name": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema2"
+                },
+                "encryptedValue": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema3"
+                },
+                "metadata": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema4"
+                },
+                "role": {
+                  "type": "string",
+                  "const": "user"
+                },
+                "content": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+                },
+                "name": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema2"
+                },
+                "encryptedValue": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema3"
+                },
+                "metadata": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema4"
+                },
+                "role": {
+                  "type": "string",
+                  "const": "assistant"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "toolCalls": {
+                  "maxItems": 32,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema6"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "role"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+                },
+                "name": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema2"
+                },
+                "encryptedValue": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema3"
+                },
+                "metadata": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema4"
+                },
+                "role": {
+                  "type": "string",
+                  "const": "tool"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "toolCallId": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "content",
+                "toolCallId"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+                },
+                "name": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema2"
+                },
+                "encryptedValue": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema3"
+                },
+                "metadata": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema4"
+                },
+                "role": {
+                  "type": "string",
+                  "const": "reasoning"
+                },
+                "content": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "content"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "__schema2": {
+          "type": "string"
+        },
+        "__schema3": {
+          "type": "string"
+        },
+        "__schema4": {
+          "type": "object",
+          "properties": {
+            "tanstack": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                },
+                "model": {
+                  "type": "string"
+                },
+                "signature": {
+                  "type": "string"
+                },
+                "toolCallMetadata": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema5"
+                },
+                "toolResult": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "__schema5": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        },
+        "__schema6": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+            },
+            "type": {
+              "type": "string",
+              "const": "function"
+            },
+            "function": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema7"
+                },
+                "arguments": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "arguments"
+              ],
+              "additionalProperties": false
+            },
+            "encryptedValue": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "function"
+          ],
+          "additionalProperties": false
+        },
+        "__schema7": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "__schema8": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema7"
+            },
+            "description": {
+              "type": "string"
+            },
+            "parameters": {
+              "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema5"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema5"
+            }
+          },
+          "required": [
+            "name",
+            "description"
+          ],
+          "additionalProperties": false
+        },
+        "__schema9": {
+          "type": "object",
+          "properties": {
+            "description": {
+              "type": "string"
+            },
+            "value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "description",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        "__schema10": {
+          "type": "object",
+          "properties": {
+            "interruptId": {
+              "$ref": "#/$defs/chatRequestEnvelope/$defs/__schema0"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "resolved",
+                "cancelled"
+              ]
+            },
+            "payload": {}
+          },
+          "required": [
+            "interruptId",
+            "status"
+          ],
+          "additionalProperties": false
+        }
+      }
+    },
+    "chatStreamEvent": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TEXT_MESSAGE_START"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "role": {
+              "type": "string",
+              "const": "assistant"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TEXT_MESSAGE_CONTENT"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "delta": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema6"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId",
+            "delta"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TEXT_MESSAGE_END"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TEXT_MESSAGE_CHUNK"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "role": {
+              "type": "string",
+              "const": "assistant"
+            },
+            "delta": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TOOL_CALL_START"
+            },
+            "toolCallId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "toolCallName": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema7"
+            },
+            "parentMessageId": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "toolCallId",
+            "toolCallName"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TOOL_CALL_ARGS"
+            },
+            "toolCallId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "delta": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "toolCallId",
+            "delta"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TOOL_CALL_END"
+            },
+            "toolCallId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "input": {}
+          },
+          "required": [
+            "metadata",
+            "type",
+            "toolCallId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TOOL_CALL_CHUNK"
+            },
+            "toolCallId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "toolCallName": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema7"
+            },
+            "parentMessageId": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "delta": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "TOOL_CALL_RESULT"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "toolCallId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "content": {
+              "type": "string"
+            },
+            "role": {
+              "type": "string",
+              "const": "tool"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId",
+            "toolCallId",
+            "content"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "THINKING_START"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "THINKING_END"
+            }
+          },
+          "required": [
+            "metadata",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "THINKING_TEXT_MESSAGE_START"
+            }
+          },
+          "required": [
+            "metadata",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "THINKING_TEXT_MESSAGE_CONTENT"
+            },
+            "delta": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "delta"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "THINKING_TEXT_MESSAGE_END"
+            }
+          },
+          "required": [
+            "metadata",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "STATE_SNAPSHOT"
+            },
+            "snapshot": {}
+          },
+          "required": [
+            "metadata",
+            "type",
+            "snapshot"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "STATE_DELTA"
+            },
+            "delta": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/chatStreamEvent/$defs/__schema8"
+              }
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "delta"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "MESSAGES_SNAPSHOT"
+            },
+            "messages": {
+              "maxItems": 512,
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/chatStreamEvent/$defs/__schema9"
+              }
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messages"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "ACTIVITY_SNAPSHOT"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "activityType": {
+              "type": "string"
+            },
+            "content": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema13"
+            },
+            "replace": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId",
+            "activityType",
+            "content"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "ACTIVITY_DELTA"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "activityType": {
+              "type": "string"
+            },
+            "patch": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/chatStreamEvent/$defs/__schema8"
+              }
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId",
+            "activityType",
+            "patch"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "RAW"
+            },
+            "event": {},
+            "source": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "event"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "CUSTOM"
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1
+            },
+            "value": {}
+          },
+          "required": [
+            "metadata",
+            "type",
+            "name",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "RUN_STARTED"
+            },
+            "threadId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "runId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "parentRunId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "threadId",
+            "runId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "RUN_FINISHED"
+            },
+            "threadId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "runId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "result": {},
+            "outcome": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "success"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "interrupt"
+                    },
+                    "interrupts": {
+                      "minItems": 1,
+                      "maxItems": 64,
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/$defs/chatStreamEvent/$defs/__schema15"
+                      }
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "interrupts"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            },
+            "usage": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema20"
+            },
+            "model": {
+              "type": "string"
+            },
+            "finishReason": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema2"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "threadId",
+            "runId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "RUN_ERROR"
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1
+            },
+            "code": {
+              "type": "string"
+            },
+            "usage": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema20"
+            },
+            "threadId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "runId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "model": {
+              "type": "string"
+            },
+            "error": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                },
+                "code": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "message"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "STEP_STARTED"
+            },
+            "stepName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "stepName"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "STEP_FINISHED"
+            },
+            "stepName": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "stepName"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "REASONING_START"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "REASONING_MESSAGE_START"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "role": {
+              "type": "string",
+              "const": "reasoning"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId",
+            "role"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "REASONING_MESSAGE_CONTENT"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "delta": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema6"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId",
+            "delta"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "REASONING_MESSAGE_END"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "REASONING_MESSAGE_CHUNK"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "delta": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "REASONING_END"
+            },
+            "messageId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "messageId"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "timestamp": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema0"
+            },
+            "metadata": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema1"
+            },
+            "type": {
+              "type": "string",
+              "const": "REASONING_ENCRYPTED_VALUE"
+            },
+            "subtype": {
+              "type": "string",
+              "enum": [
+                "tool-call",
+                "message"
+              ]
+            },
+            "entityId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "encryptedValue": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metadata",
+            "type",
+            "subtype",
+            "entityId",
+            "encryptedValue"
+          ],
+          "additionalProperties": false
+        }
+      ],
+      "$defs": {
+        "__schema0": {
+          "type": "number"
+        },
+        "__schema1": {
+          "type": "object",
+          "properties": {
+            "caesAi": {
+              "type": "object",
+              "properties": {
+                "protocolVersion": {
+                  "type": "number",
+                  "const": 1
+                }
+              },
+              "required": [
+                "protocolVersion"
+              ],
+              "additionalProperties": false
+            },
+            "tanstack": {
+              "type": "object",
+              "properties": {
+                "model": {
+                  "type": "string"
+                },
+                "finishReason": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema2"
+                },
+                "usage": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema3"
+                },
+                "threadId": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                "runId": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                "sessionId": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                "index": {
+                  "type": "integer",
+                  "minimum": -9007199254740991,
+                  "maximum": 9007199254740991
+                },
+                "state": {
+                  "type": "string",
+                  "enum": [
+                    "input-streaming",
+                    "input-available",
+                    "approval-requested",
+                    "approval-responded",
+                    "output-available",
+                    "output-error",
+                    "output-denied"
+                  ]
+                },
+                "input": {},
+                "interruptErrors": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "scope": {
+                        "type": "string",
+                        "enum": [
+                          "item",
+                          "batch"
+                        ]
+                      },
+                      "code": {
+                        "type": "string"
+                      },
+                      "message": {
+                        "type": "string"
+                      },
+                      "source": {
+                        "type": "string",
+                        "enum": [
+                          "client",
+                          "server",
+                          "transport"
+                        ]
+                      },
+                      "interruptId": {
+                        "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                      },
+                      "interruptIds": {
+                        "type": "array",
+                        "items": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                        }
+                      }
+                    },
+                    "required": [
+                      "scope",
+                      "code",
+                      "message",
+                      "source"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "caesAi"
+          ],
+          "additionalProperties": false
+        },
+        "__schema2": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "stop",
+                "length",
+                "content_filter",
+                "tool_calls"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "__schema3": {
+          "type": "object",
+          "properties": {
+            "cost": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+            },
+            "promptTokens": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+            },
+            "completionTokens": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+            },
+            "totalTokens": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+            },
+            "promptTokensDetails": {
+              "type": "object",
+              "properties": {
+                "cachedTokens": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                },
+                "audioTokens": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                }
+              },
+              "additionalProperties": false
+            },
+            "completionTokensDetails": {
+              "type": "object",
+              "properties": {
+                "reasoningTokens": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                },
+                "audioTokens": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                },
+                "acceptedPredictionTokens": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                },
+                "rejectedPredictionTokens": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "__schema4": {
+          "type": "number",
+          "minimum": 0
+        },
+        "__schema5": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "__schema6": {
+          "type": "string"
+        },
+        "__schema7": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "__schema8": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "op": {
+                  "type": "string",
+                  "enum": [
+                    "add",
+                    "replace",
+                    "test"
+                  ]
+                },
+                "path": {
+                  "type": "string"
+                },
+                "value": {}
+              },
+              "required": [
+                "op",
+                "path",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "op": {
+                  "type": "string",
+                  "const": "remove"
+                },
+                "path": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "op",
+                "path"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "op": {
+                  "type": "string",
+                  "enum": [
+                    "move",
+                    "copy"
+                  ]
+                },
+                "path": {
+                  "type": "string"
+                },
+                "from": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "op",
+                "path",
+                "from"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "__schema9": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                "name": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema10"
+                },
+                "encryptedValue": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema11"
+                },
+                "metadata": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema12"
+                },
+                "role": {
+                  "type": "string",
+                  "const": "user"
+                },
+                "content": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "content"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                "name": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema10"
+                },
+                "encryptedValue": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema11"
+                },
+                "metadata": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema12"
+                },
+                "role": {
+                  "type": "string",
+                  "const": "assistant"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "toolCalls": {
+                  "maxItems": 32,
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/chatStreamEvent/$defs/__schema14"
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "role"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                "name": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema10"
+                },
+                "encryptedValue": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema11"
+                },
+                "metadata": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema12"
+                },
+                "role": {
+                  "type": "string",
+                  "const": "tool"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "toolCallId": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                "error": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "content",
+                "toolCallId"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                },
+                "name": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema10"
+                },
+                "encryptedValue": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema11"
+                },
+                "metadata": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema12"
+                },
+                "role": {
+                  "type": "string",
+                  "const": "reasoning"
+                },
+                "content": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "role",
+                "content"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "__schema10": {
+          "type": "string"
+        },
+        "__schema11": {
+          "type": "string"
+        },
+        "__schema12": {
+          "type": "object",
+          "properties": {
+            "tanstack": {
+              "type": "object",
+              "properties": {
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+                },
+                "model": {
+                  "type": "string"
+                },
+                "signature": {
+                  "type": "string"
+                },
+                "toolCallMetadata": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema13"
+                },
+                "toolResult": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                    },
+                    "createdAt": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        },
+        "__schema13": {
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {}
+        },
+        "__schema14": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "type": {
+              "type": "string",
+              "const": "function"
+            },
+            "function": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema7"
+                },
+                "arguments": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "arguments"
+              ],
+              "additionalProperties": false
+            },
+            "encryptedValue": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "type",
+            "function"
+          ],
+          "additionalProperties": false
+        },
+        "__schema15": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "reason": {
+              "type": "string"
+            },
+            "message": {
+              "type": "string"
+            },
+            "toolCallId": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+            },
+            "responseSchema": {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema13"
+            },
+            "expiresAt": {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d:[0-5]\\d(?:\\.\\d+)?(?:Z|([+-](?:[01]\\d|2[0-3]):[0-5]\\d)))$"
+            },
+            "metadata": {
+              "type": "object",
+              "properties": {
+                "kind": {
+                  "type": "string",
+                  "enum": [
+                    "approval",
+                    "client_tool"
+                  ]
+                },
+                "toolName": {
+                  "$ref": "#/$defs/chatStreamEvent/$defs/__schema7"
+                },
+                "input": {},
+                "tanstack:interruptBinding": {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "v": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema16"
+                        },
+                        "interruptId": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                        },
+                        "toolName": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema7"
+                        },
+                        "toolCallId": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                        },
+                        "responseSchemaHash": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema17"
+                        },
+                        "interruptedRunId": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema18"
+                        },
+                        "generation": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema19"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "tool-approval"
+                        },
+                        "originalArgs": {},
+                        "inputSchemaHash": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema17"
+                        },
+                        "approvalSchemaHash": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema17"
+                        }
+                      },
+                      "required": [
+                        "v",
+                        "interruptId",
+                        "toolName",
+                        "toolCallId",
+                        "responseSchemaHash",
+                        "kind",
+                        "originalArgs",
+                        "inputSchemaHash",
+                        "approvalSchemaHash"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "v": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema16"
+                        },
+                        "interruptId": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                        },
+                        "toolName": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema7"
+                        },
+                        "toolCallId": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+                        },
+                        "responseSchemaHash": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema17"
+                        },
+                        "interruptedRunId": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema18"
+                        },
+                        "generation": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema19"
+                        },
+                        "kind": {
+                          "type": "string",
+                          "const": "client-tool-execution"
+                        },
+                        "outputSchemaHash": {
+                          "$ref": "#/$defs/chatStreamEvent/$defs/__schema17"
+                        }
+                      },
+                      "required": [
+                        "v",
+                        "interruptId",
+                        "toolName",
+                        "toolCallId",
+                        "responseSchemaHash",
+                        "kind",
+                        "outputSchemaHash"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "kind",
+                "toolName",
+                "input",
+                "tanstack:interruptBinding"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "id",
+            "reason",
+            "toolCallId",
+            "responseSchema",
+            "metadata"
+          ],
+          "additionalProperties": false
+        },
+        "__schema16": {
+          "type": "number",
+          "const": 1
+        },
+        "__schema17": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "__schema18": {
+          "$ref": "#/$defs/chatStreamEvent/$defs/__schema5"
+        },
+        "__schema19": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "__schema20": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/chatStreamEvent/$defs/__schema3"
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "provider": {
+                    "type": "string"
+                  },
+                  "model": {
+                    "type": "string"
+                  },
+                  "inputTokens": {
+                    "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                  },
+                  "outputTokens": {
+                    "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                  },
+                  "totalTokens": {
+                    "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                  },
+                  "reasoningTokens": {
+                    "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                  },
+                  "cachedInputTokens": {
+                    "$ref": "#/$defs/chatStreamEvent/$defs/__schema4"
+                  }
+                },
+                "additionalProperties": false
+              }
+            }
+          ]
+        }
+      }
+    },
+    "uiEffect": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "key"
+          ],
+          "properties": {
+            "type": {
+              "const": "invalidate-query"
+            },
+            "key": {
+              "type": "array",
+              "minItems": 1,
+              "maxItems": 16
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "level",
+            "message"
+          ],
+          "properties": {
+            "type": {
+              "const": "toast"
+            },
+            "level": {
+              "type": "string",
+              "enum": [
+                "success",
+                "info",
+                "error"
+              ]
+            },
+            "message": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512,
+              "pattern": "\\S"
+            }
+          }
+        }
+      ]
+    },
+    "toolOutputEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "data"
+      ],
+      "properties": {
+        "data": true,
+        "display": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kind",
+            "props"
+          ],
+          "properties": {
+            "kind": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9-]{0,63}$"
+            },
+            "props": {
+              "type": "object"
+            },
+            "visibility": {
+              "type": "string",
+              "enum": [
+                "inline",
+                "details",
+                "hidden"
+              ],
+              "default": "details"
+            },
+            "suppressAssistantText": {
+              "type": "boolean"
+            }
+          }
+        },
+        "uiEffects": {
+          "type": "array",
+          "maxItems": 16,
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/uiEffect"
+          }
+        }
+      }
+    },
+    "toolExecutionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "sessionId",
+        "toolCallId",
+        "toolName",
+        "toolManifestHash",
+        "arguments",
+        "contextToken"
+      ],
+      "properties": {
+        "protocolVersion": {
+          "$ref": "#/$defs/protocolVersion"
+        },
+        "sessionId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "toolCallId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "toolName": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "toolManifestHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "arguments": true,
+        "contextToken": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 8192
+        }
+      }
+    },
+    "caesAiError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "retryable"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "retryable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "caesAiErrorResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "protocolVersion",
+        "error"
+      ],
+      "properties": {
+        "protocolVersion": {
+          "$ref": "#/$defs/protocolVersion"
+        },
+        "error": {
+          "$ref": "#/$defs/caesAiError"
+        }
+      }
+    },
+    "toolExecutionResponse": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protocolVersion",
+            "ok",
+            "output"
+          ],
+          "properties": {
+            "protocolVersion": {
+              "$ref": "#/$defs/protocolVersion"
+            },
+            "ok": {
+              "const": true
+            },
+            "output": {
+              "$ref": "#/$defs/toolOutputEnvelope"
+            }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "protocolVersion",
+            "ok",
+            "error"
+          ],
+          "properties": {
+            "protocolVersion": {
+              "$ref": "#/$defs/protocolVersion"
+            },
+            "ok": {
+              "const": false
+            },
+            "error": {
+              "$ref": "#/$defs/caesAiError"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

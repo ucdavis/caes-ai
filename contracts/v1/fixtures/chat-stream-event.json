@@ -1,0 +1,11 @@
+{
+  "type": "TEXT_MESSAGE_CONTENT",
+  "messageId": "message-456",
+  "delta": "You have five active todos.",
+  "timestamp": 1788552000000,
+  "metadata": {
+    "caesAi": {
+      "protocolVersion": 1
+    }
+  }
+}

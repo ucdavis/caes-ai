@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1788455722207,
+      "tag": "0000_application_registry",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1788541530457,
+      "tag": "0001_lively_gladiator",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Build and test
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: caesai_test
+          POSTGRES_PASSWORD: caes-ai-test-password
+          POSTGRES_DB: caesai_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U caesai_test -d caesai_test"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 30
+    env:
+      CAES_AI_TEST_DATABASE_URL: postgresql://caesai_test:caes-ai-test-password@127.0.0.1:5432/caesai_test
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          package-manager-cache: false
+      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          cache: true
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: "10.0.x"
+      - run: pnpm install --frozen-lockfile
+      - run: dotnet restore apps/todo-app/UCDavis.CaesAi.Todo.slnx
+      - run: pnpm check
+      - run: pnpm build
+      - name: Verify package creation without publishing
+        run: |
+          pnpm pack:protocol
+          pnpm pack:assistant
+          pnpm pack:dotnet

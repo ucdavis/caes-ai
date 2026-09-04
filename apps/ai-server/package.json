@@ -1,0 +1,45 @@
+{
+  "name": "@ucdavis/caes-ai-server",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "caes-ai": "tsx src/cli.ts",
+    "db:check": "drizzle-kit check",
+    "db:bootstrap-todo": "tsx scripts/dev/bootstrap-todo.ts",
+    "db:generate": "drizzle-kit generate",
+    "dev": "tsx watch src/server.ts",
+    "pretest": "pnpm --filter @ucdavis/caes-ai-protocol build",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "@fastify/otel": "^0.20.1",
+    "@opentelemetry/api": "^1.9.0",
+    "@opentelemetry/exporter-metrics-otlp-proto": "^0.222.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.222.0",
+    "@opentelemetry/instrumentation-http": "^0.222.0",
+    "@opentelemetry/instrumentation-pg": "^0.74.0",
+    "@opentelemetry/sdk-metrics": "^2.11.0",
+    "@opentelemetry/sdk-node": "^0.222.0",
+    "@tanstack/ai": "^0.52.1",
+    "@tanstack/ai-openai": "^0.22.3",
+    "@ucdavis/caes-ai-protocol": "workspace:*",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
+    "dotenv": "^17.2.3",
+    "drizzle-orm": "^0.45.2",
+    "fastify": "^5.12.1",
+    "jose": "^6.2.10",
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.23.1",
+    "drizzle-kit": "^0.31.10",
+    "tsx": "^4.20.6",
+    "vitest": "^4.1.11"
+  }
+}

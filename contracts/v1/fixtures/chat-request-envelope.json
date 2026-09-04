@@ -1,0 +1,18 @@
+{
+  "protocolVersion": 1,
+  "threadId": "thread-123",
+  "runId": "run-123",
+  "state": {},
+  "messages": [
+    {
+      "id": "message-123",
+      "role": "user",
+      "content": "Summarize my active todos."
+    }
+  ],
+  "tools": [],
+  "context": [],
+  "forwardedProps": {
+    "reasoningEffort": "medium"
+  }
+}

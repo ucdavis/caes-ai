@@ -1,0 +1,9 @@
+{
+  "protocolVersion": 1,
+  "ok": false,
+  "error": {
+    "code": "tool_not_found",
+    "message": "The requested tool is not available.",
+    "retryable": false
+  }
+}

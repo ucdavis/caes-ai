@@ -1,0 +1,37 @@
+{
+  "name": "@ucdavis/caes-ai-protocol",
+  "version": "0.1.0",
+  "description": "Runtime-validated wire contracts for CAES AI applications.",
+  "type": "module",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./schema": "./dist/protocol.schema.json"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json && cp ../../contracts/v1/protocol.schema.json dist/protocol.schema.json && cp ../../contracts/v1/README.md dist/protocol.md",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.1.12",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.11"
+  }
+}

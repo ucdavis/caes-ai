@@ -1,0 +1,55 @@
+{
+  "name": "@ucdavis/caes-ai-assistant-react",
+  "version": "0.1.0",
+  "description": "Headless React runtime with optional assistant UI for CAES AI applications.",
+  "type": "module",
+  "sideEffects": ["*.css"],
+  "files": ["dist", "README.md", "CHANGELOG.md"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./ui": {
+      "types": "./dist/ui.d.ts",
+      "import": "./dist/ui.js"
+    },
+    "./theme.css": "./dist/theme.css",
+    "./styles.css": "./dist/theme.css"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup && node scripts/check-public-api.mjs",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@ucdavis/caes-ai-protocol": "workspace:^",
+    "react-markdown": "^10.1.0",
+    "remark-gfm": "^4.0.1"
+  },
+  "peerDependencies": {
+    "@tanstack/ai": "^0.52.1",
+    "@tanstack/ai-react": "^0.23.0",
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/ai": "^0.52.1",
+    "@tanstack/ai-react": "^0.23.0",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "jsdom": "^28.1.0",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tsup": "^8.5.1",
+    "vitest": "^4.1.11"
+  }
+}

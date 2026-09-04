@@ -1,0 +1,16 @@
+{
+  "protocolVersion": 1,
+  "ok": true,
+  "output": {
+    "data": {
+      "count": 3
+    },
+    "display": {
+      "kind": "item-summary",
+      "props": {},
+      "visibility": "inline",
+      "suppressAssistantText": true
+    },
+    "uiEffects": []
+  }
+}

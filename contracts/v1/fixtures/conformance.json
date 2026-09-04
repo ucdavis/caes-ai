@@ -1,0 +1,1641 @@
+[
+  {
+    "name": "session-creation-request valid",
+    "definition": "sessionCreationRequest",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request missing protocolVersion",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request missing userReference",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request missing contextToken",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request missing instructions",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request missing modelPolicy",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request missing tools",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      }
+    }
+  },
+  {
+    "name": "session-creation-request unknown field",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ],
+      "unexpected": true
+    }
+  },
+  {
+    "name": "session-creation-response valid",
+    "definition": "sessionCreationResponse",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-response missing protocolVersion",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-response missing sessionId",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-response missing accessToken",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-response missing expiresAt",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-response missing chatUrl",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-response missing modelPolicy",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-response missing toolManifestHash",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "session-creation-response missing tools",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    }
+  },
+  {
+    "name": "session-creation-response unknown field",
+    "definition": "sessionCreationResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "accessToken": "fixture-browser-session-token-that-is-long-enough",
+      "expiresAt": "2026-09-03T19:30:00Z",
+      "chatUrl": "https://caes-ai.example/v1/sessions/08ab127b-2fd4-4f4c-9348-034f66365d49/chat",
+      "modelPolicy": {
+        "model": "fixture-model",
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowedReasoningEfforts": [
+          "none",
+          "low",
+          "medium"
+        ]
+      },
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ],
+      "unexpected": true
+    }
+  },
+  {
+    "name": "tool-execution-request valid",
+    "definition": "toolExecutionRequest",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "toolCallId": "call-fixture-1",
+      "toolName": "read_items",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "arguments": {},
+      "contextToken": "fixture-context-token"
+    }
+  },
+  {
+    "name": "tool-execution-request missing protocolVersion",
+    "definition": "toolExecutionRequest",
+    "valid": false,
+    "value": {
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "toolCallId": "call-fixture-1",
+      "toolName": "read_items",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "arguments": {},
+      "contextToken": "fixture-context-token"
+    }
+  },
+  {
+    "name": "tool-execution-request missing sessionId",
+    "definition": "toolExecutionRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "toolCallId": "call-fixture-1",
+      "toolName": "read_items",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "arguments": {},
+      "contextToken": "fixture-context-token"
+    }
+  },
+  {
+    "name": "tool-execution-request missing toolCallId",
+    "definition": "toolExecutionRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "toolName": "read_items",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "arguments": {},
+      "contextToken": "fixture-context-token"
+    }
+  },
+  {
+    "name": "tool-execution-request missing toolName",
+    "definition": "toolExecutionRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "toolCallId": "call-fixture-1",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "arguments": {},
+      "contextToken": "fixture-context-token"
+    }
+  },
+  {
+    "name": "tool-execution-request missing toolManifestHash",
+    "definition": "toolExecutionRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "toolCallId": "call-fixture-1",
+      "toolName": "read_items",
+      "arguments": {},
+      "contextToken": "fixture-context-token"
+    }
+  },
+  {
+    "name": "tool-execution-request missing arguments",
+    "definition": "toolExecutionRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "toolCallId": "call-fixture-1",
+      "toolName": "read_items",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "contextToken": "fixture-context-token"
+    }
+  },
+  {
+    "name": "tool-execution-request missing contextToken",
+    "definition": "toolExecutionRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "toolCallId": "call-fixture-1",
+      "toolName": "read_items",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "arguments": {}
+    }
+  },
+  {
+    "name": "tool-execution-request unknown field",
+    "definition": "toolExecutionRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "sessionId": "08ab127b-2fd4-4f4c-9348-034f66365d49",
+      "toolCallId": "call-fixture-1",
+      "toolName": "read_items",
+      "toolManifestHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "arguments": {},
+      "contextToken": "fixture-context-token",
+      "unexpected": true
+    }
+  },
+  {
+    "name": "tool-execution-response valid",
+    "definition": "toolExecutionResponse",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "ok": true,
+      "output": {
+        "data": {
+          "count": 3
+        },
+        "display": {
+          "kind": "item-summary",
+          "props": {},
+          "visibility": "inline",
+          "suppressAssistantText": true
+        },
+        "uiEffects": []
+      }
+    }
+  },
+  {
+    "name": "tool-execution-response missing protocolVersion",
+    "definition": "toolExecutionResponse",
+    "valid": false,
+    "value": {
+      "ok": true,
+      "output": {
+        "data": {
+          "count": 3
+        },
+        "display": {
+          "kind": "item-summary",
+          "props": {},
+          "visibility": "inline",
+          "suppressAssistantText": true
+        },
+        "uiEffects": []
+      }
+    }
+  },
+  {
+    "name": "tool-execution-response missing ok",
+    "definition": "toolExecutionResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "output": {
+        "data": {
+          "count": 3
+        },
+        "display": {
+          "kind": "item-summary",
+          "props": {},
+          "visibility": "inline",
+          "suppressAssistantText": true
+        },
+        "uiEffects": []
+      }
+    }
+  },
+  {
+    "name": "tool-execution-response missing output",
+    "definition": "toolExecutionResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "ok": true
+    }
+  },
+  {
+    "name": "tool-execution-response unknown field",
+    "definition": "toolExecutionResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "ok": true,
+      "output": {
+        "data": {
+          "count": 3
+        },
+        "display": {
+          "kind": "item-summary",
+          "props": {},
+          "visibility": "inline",
+          "suppressAssistantText": true
+        },
+        "uiEffects": []
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "tool-execution-error-response valid",
+    "definition": "toolExecutionResponse",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "ok": false,
+      "error": {
+        "code": "tool_not_found",
+        "message": "The requested tool is not available.",
+        "retryable": false
+      }
+    }
+  },
+  {
+    "name": "tool-execution-error-response missing protocolVersion",
+    "definition": "toolExecutionResponse",
+    "valid": false,
+    "value": {
+      "ok": false,
+      "error": {
+        "code": "tool_not_found",
+        "message": "The requested tool is not available.",
+        "retryable": false
+      }
+    }
+  },
+  {
+    "name": "tool-execution-error-response missing ok",
+    "definition": "toolExecutionResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "error": {
+        "code": "tool_not_found",
+        "message": "The requested tool is not available.",
+        "retryable": false
+      }
+    }
+  },
+  {
+    "name": "tool-execution-error-response missing error",
+    "definition": "toolExecutionResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "ok": false
+    }
+  },
+  {
+    "name": "tool-execution-error-response unknown field",
+    "definition": "toolExecutionResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "ok": false,
+      "error": {
+        "code": "tool_not_found",
+        "message": "The requested tool is not available.",
+        "retryable": false
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "error-response valid",
+    "definition": "caesAiErrorResponse",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "error": {
+        "code": "invalid_session_token",
+        "message": "The assistant session is invalid or expired.",
+        "retryable": false
+      }
+    }
+  },
+  {
+    "name": "error-response missing protocolVersion",
+    "definition": "caesAiErrorResponse",
+    "valid": false,
+    "value": {
+      "error": {
+        "code": "invalid_session_token",
+        "message": "The assistant session is invalid or expired.",
+        "retryable": false
+      }
+    }
+  },
+  {
+    "name": "error-response missing error",
+    "definition": "caesAiErrorResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1
+    }
+  },
+  {
+    "name": "error-response unknown field",
+    "definition": "caesAiErrorResponse",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "error": {
+        "code": "invalid_session_token",
+        "message": "The assistant session is invalid or expired.",
+        "retryable": false
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "chat-request-envelope valid",
+    "definition": "chatRequestEnvelope",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "chat-request-envelope missing protocolVersion",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "chat-request-envelope missing threadId",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "chat-request-envelope missing runId",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "chat-request-envelope missing messages",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "chat-request-envelope missing tools",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "chat-request-envelope missing context",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "chat-request-envelope unknown field",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "chat-stream-event valid",
+    "definition": "chatStreamEvent",
+    "valid": true,
+    "value": {
+      "type": "TEXT_MESSAGE_CONTENT",
+      "messageId": "message-456",
+      "delta": "You have five active todos.",
+      "timestamp": 1788552000000,
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "chat-stream-event missing type",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "messageId": "message-456",
+      "delta": "You have five active todos.",
+      "timestamp": 1788552000000,
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "chat-stream-event missing messageId",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "TEXT_MESSAGE_CONTENT",
+      "delta": "You have five active todos.",
+      "timestamp": 1788552000000,
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "chat-stream-event missing delta",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "TEXT_MESSAGE_CONTENT",
+      "messageId": "message-456",
+      "timestamp": 1788552000000,
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "chat-stream-event missing metadata",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "TEXT_MESSAGE_CONTENT",
+      "messageId": "message-456",
+      "delta": "You have five active todos.",
+      "timestamp": 1788552000000
+    }
+  },
+  {
+    "name": "chat-stream-event unknown field",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "TEXT_MESSAGE_CONTENT",
+      "messageId": "message-456",
+      "delta": "You have five active todos.",
+      "timestamp": 1788552000000,
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      },
+      "unexpected": true
+    }
+  },
+  {
+    "name": "unknown presentation property",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "summary",
+            "unexpected": true
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "invalid messages 56",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        42
+      ],
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "invalid messages 57",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "m",
+          "role": "user"
+        }
+      ],
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "invalid resume 58",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      },
+      "resume": [
+        {
+          "interruptId": "c",
+          "status": "anything"
+        }
+      ]
+    }
+  },
+  {
+    "name": "invalid tools 59",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [
+        42
+      ],
+      "context": [],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "invalid context 60",
+    "definition": "chatRequestEnvelope",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "threadId": "thread-123",
+      "runId": "run-123",
+      "state": {},
+      "messages": [
+        {
+          "id": "message-123",
+          "role": "user",
+          "content": "Summarize my active todos."
+        }
+      ],
+      "tools": [],
+      "context": [
+        42
+      ],
+      "forwardedProps": {
+        "reasoningEffort": "medium"
+      }
+    }
+  },
+  {
+    "name": "incomplete TEXT_MESSAGE_CONTENT",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "TEXT_MESSAGE_CONTENT",
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "incomplete TOOL_CALL_START",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "TOOL_CALL_START",
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "incomplete RUN_FINISHED",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "RUN_FINISHED",
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "incomplete RUN_ERROR",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "RUN_ERROR",
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  },
+  {
+    "name": "incomplete REASONING_MESSAGE_CONTENT",
+    "definition": "chatStreamEvent",
+    "valid": false,
+    "value": {
+      "type": "REASONING_MESSAGE_CONTENT",
+      "metadata": {
+        "caesAi": {
+          "protocolVersion": 1
+        }
+      }
+    }
+  }
+]

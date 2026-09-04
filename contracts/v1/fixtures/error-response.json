@@ -1,0 +1,8 @@
+{
+  "protocolVersion": 1,
+  "error": {
+    "code": "invalid_session_token",
+    "message": "The assistant session is invalid or expired.",
+    "retryable": false
+  }
+}

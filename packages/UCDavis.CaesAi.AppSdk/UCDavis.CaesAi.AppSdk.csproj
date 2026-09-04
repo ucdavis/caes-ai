@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>true</IsPackable>
+    <PackageId>UCDavis.CaesAi.AppSdk</PackageId>
+    <VersionPrefix>0.1.0</VersionPrefix>
+    <VersionSuffix>alpha.2</VersionSuffix>
+    <Description>Application-side contracts and ASP.NET Core integration for CAES AI.</Description>
+    <PackageTags>caes-ai;ai;assistant;aspnetcore</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="JsonSchema.Net" Version="9.4.0" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.22.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="../../contracts/v1/protocol.schema.json" LogicalName="CaesAi.Protocol.V1" />
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="../../contracts/v1/protocol.schema.json"
+          Link="protocol.schema.json"
+          Pack="true"
+          PackagePath="contentFiles/any/any/caes-ai/v1/protocol.schema.json" />
+    <None Include="../../contracts/v1/README.md"
+          Link="protocol.md"
+          Pack="true"
+          PackagePath="contentFiles/any/any/caes-ai/v1/protocol.md" />
+  </ItemGroup>
+
+</Project>
