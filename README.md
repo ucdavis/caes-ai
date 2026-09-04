@@ -37,13 +37,13 @@ The browser never receives an application key, callback JWT, context-signing key
 
 | Location | Purpose |
 | --- | --- |
-| `apps/ai-server` | Central Fastify service, PostgreSQL application registry, admin CLI, bounded sessions, provider boundary, TanStack AI orchestration, and generic tool gateway |
-| `packages/UCDavis.CaesAi.AppSdk` | Packable .NET contracts, session client, signed context, schema and idempotency helpers, and ASP.NET Core callback endpoint |
-| `packages/assistant-react` | Headless React runtime plus opt-in accessible UI components and starter theme |
-| `packages/protocol` | Strict shared session, manifest, callback, error, and UI-effect schemas |
-| `apps/todo-app/api` | .NET 10/EF Core Todo API, signed application context, tool definitions, explicit handlers, and SQLite data |
-| `apps/todo-app/web` | Todo UI, TanStack Query integration, client tool, and Todo-specific result renderers |
-| `tests/e2e` | Playwright proof of the normal and live assistant flows |
+| [apps/ai-server](apps/ai-server/README.md) | Central Fastify service, PostgreSQL application registry, admin CLI, bounded sessions, provider boundary, TanStack AI orchestration, and generic tool gateway |
+| [packages/UCDavis.CaesAi.AppSdk](packages/UCDavis.CaesAi.AppSdk/README.md) | Packable .NET contracts, session client, signed context, schema and idempotency helpers, and ASP.NET Core callback endpoint |
+| [packages/assistant-react](packages/assistant-react/README.md) | Headless React runtime plus opt-in accessible UI components and starter theme |
+| [packages/protocol](packages/protocol/README.md) | Strict shared session, manifest, callback, error, and UI-effect schemas |
+| [apps/todo-app/api](apps/todo-app/api/README.md) | .NET 10/EF Core Todo API, signed application context, tool definitions, explicit handlers, and SQLite data |
+| [apps/todo-app/web](apps/todo-app/web/README.md) | Todo UI, TanStack Query integration, client tool, and Todo-specific result renderers |
+| [tests/e2e](tests/e2e/README.md) | Playwright proof of the normal and live assistant flows |
 
 ## Requirements
 
@@ -217,7 +217,7 @@ npm and NuGet artifacts without publishing. `pnpm test:e2e` is separate, starts 
 demo when needed and uses a live provider credential. See
 [manual-test.md](docs/manual-test.md) for that check.
 
-Publishable npm package changes use Changesets:
+Publishable JavaScript package changes use [Changesets](.changeset/README.md) to record release notes and requested version bumps:
 
 ```bash
 pnpm changeset
@@ -240,4 +240,5 @@ Versioning and publishing remain separate, explicit operations. `@tanstack/ai`, 
 - The server intentionally supports only OpenAI's Responses API; it has no Chat Completions compatibility path.
 - No live OpenAI test can run without a valid `OPENAI_API_KEY`; follow the documented credential-gated smoke test.
 
-Further detail is in [architecture.md](docs/architecture.md), [protocol.md](docs/protocol.md), and the [ADRs](docs/adr/).
+Further detail is in the [documentation index](docs/README.md),
+[architecture.md](docs/architecture.md) and [protocol.md](docs/protocol.md).

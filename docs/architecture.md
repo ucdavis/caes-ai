@@ -11,6 +11,10 @@ CAES AI separates model orchestration from application authority.
 
 The PostgreSQL application registry stores fixed destinations and policy, not tools. Application keys have public key IDs for lookup, but CAES AI stores only their SHA-256 hashes. The session request carries tools but cannot carry a callback URL. That combination lets team-owned applications iterate on their tools without allowing a model or compromised browser to turn the central server into a general HTTP proxy.
 
+Changing a tool requires a new session with a new manifest snapshot. It does not
+require a central tool-catalog release. Applications remain responsible for explicit
+dispatch, current-user authorization and compatibility with their accepted manifests.
+
 ## Session lifecycle
 
 1. The Todo API resolves `demo-user-1` and gives `UCDavis.CaesAi.AppSdk` its instructions and current five-tool manifest. The SDK creates a nonce-bearing HMAC context token, applies the configured model request, and calls the central service.
@@ -19,11 +23,15 @@ The PostgreSQL application registry stores fixed destinations and policy, not to
 4. The browser sends TanStack/AG-UI messages to the returned chat URL. A 401 makes the React client obtain one new application-created session and retry once.
 5. The central service rebuilds TanStack tool definitions from the frozen manifest for each chat run and streams SSE without buffering the full answer.
 
-The React provider creates no session merely because it mounted. Opening or embedding the assistant creates one lazily; `eager` is an explicit opt-in. Every server instance reads session state from PostgreSQL, so restarts and horizontal scaling do not invalidate or partition sessions. Expiration is enforced on authentication and active-session counts.
+The React provider creates no session merely because it mounted. Opening or embedding the assistant creates one lazily; `eager` is an explicit opt-in. Session state is read from PostgreSQL and survives process restarts. Expiration is enforced on authentication and active-session counts; expired rows remain until a retention job is implemented. The first beta uses one central instance, as described in the [beta scope](beta-milestone.md).
 
 ## Application registry
 
 Drizzle's TypeScript schema defines the registry, session, run, and tool-call tables; generated SQL migrations are checked in. CAES AI applies pending migrations before it starts listening. The administration CLI uses the same migration and database code.
+
+CLI access requires direct database credentials. Registration and key changes do
+not require a central deployment. The Todo bootstrap is a separate development
+command; server startup does not provision that example application.
 
 Each generated application key has a random key ID and 256 bits of secret material. The key ID selects one active row. CAES AI hashes the complete key and compares it to the stored hash before returning the application callback and policy. Rotation creates an overlapping key. Revocation marks one key, while application disablement blocks every key and browser origin for that application.
 
@@ -75,6 +83,10 @@ Runs carry application, session, run, provider, transport, model, effort, durati
 
 OpenTelemetry export is opt-in. When enabled, CAES AI installs the Node SDK before loading the HTTP server, database driver, or model adapter. OTLP HTTP/protobuf exporters send traces and metrics to the configured standard endpoint. Instrumentation covers HTTP, Fastify, PostgreSQL, and model work while disabling Fastify health-route spans, enhanced database reporting, and routine prompt/result capture. Full exception messages and stacks remain in the trusted OTEL destination; telemetry therefore has no content-free guarantee. The engine’s duplicate console exception logger is disabled. Active trace and span IDs are added to structured logs. With export disabled, local development installs no provider or exporter.
 
+Enabling export requires a shared OTLP endpoint or both signal-specific endpoints;
+missing destinations fail configuration. `OTEL_SDK_DISABLED=true` takes precedence
+over `CAES_AI_OTEL_ENABLED`.
+
 Provider retries are deliberately narrow. CAES AI buffers only the initial `RUN_STARTED` event and retries a transient failure only before any other observable output and before any write tool executor begins. Authentication, permission, invalid-request, content, and not-found failures are not retried. Backoff and attempt count are bounded by central configuration.
 
 Browser disconnects cancel the chat run. Cancellation prevents callback dispatch, including after asynchronous token signing, and aborts read callbacks in flight. A dispatched, approved write retains its existing callback timeout and can finish after the browser disconnects. Its tool record captures the actual result while the chat run records `cancelled`. Cancellation cannot roll back an application mutation, and this path does not retry callbacks. Shutdown coordination and mutation-outcome recovery remain deferred.
@@ -84,6 +96,11 @@ Browser disconnects cancel the chat run. Cancellation prevents callback dispatch
 Every CAES AI-owned session, browser chat, stream event metadata, and callback body carries protocol version 1. Browser chat also sends and receives `X-CAES-AI-Protocol-Version: 1`. `contracts/v1/protocol.schema.json` is normative. The TypeScript validators and .NET DTOs implement the application-side schema; the React client implements the browser-chat schema. Shared checked-in fixtures verify both. Version 1 is strict rather than negotiated: unknown versions fail with `unsupported_protocol_version`. A later version can support an overlap period without weakening the current contract.
 
 `@ucdavis/caes-ai-protocol` owns runtime wire validation and shared envelopes. `UCDavis.CaesAi.AppSdk` owns application-side .NET transport, callback authentication, context validation, and request-identity helpers. The React package exposes CAES AI session, message, renderer, UI-effect, and tiny client-tool types; TanStack AI stays behind that public boundary. Applications still own current-user authentication and reauthorization, business handlers, persistence, and output data schemas.
+
+The React package's declaration check rejects selected TanStack types in its public
+API. TanStack packages are still runtime peers, but host code does not need their
+tool or transport types. A non-React client can implement the versioned wire contract
+directly.
 
 ## Production work
 
