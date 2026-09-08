@@ -92,7 +92,7 @@ jobs:
         run: |
           set -euo pipefail
           apps="$(az webapp list --subscription "$AZURE_SUBSCRIPTION_ID" --resource-group "$RESOURCE_GROUP" \
-            --query "[?tags.application=='caes-ai' && tags.environment=='test'].{name:name,host:defaultHostName,plan:serverFarmId}" -o json)"
+            --query "[?tags.application=='caes-ai' && tags.environment=='test'].{name:name,host:defaultHostName,plan:not_null(appServicePlanId, serverFarmId)}" -o json)"
           test "$(jq length <<< "$apps")" = 1
           plan="$(jq -r '.[0].plan | ascii_downcase' <<< "$apps")"
           test "$plan" = '/subscriptions/105dede4-4731-492e-8c28-5121226319b0/resourcegroups/default-web-westus/providers/microsoft.web/serverfarms/defaultplan2'
