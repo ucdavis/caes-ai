@@ -1,0 +1,47 @@
+name: Bootstrap Azure test identity
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: azure-test
+  cancel-in-progress: false
+
+jobs:
+  bootstrap:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: azure-bootstrap
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_BOOTSTRAP_CLIENT_ID }}
+      AZURE_TENANT_ID: a8046f64-66c0-4f00-9046-c8daf92ff62b
+      AZURE_SUBSCRIPTION_ID: 105dede4-4731-492e-8c28-5121226319b0
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate bootstrap identity
+        run: |
+          test -n "$AZURE_CLIENT_ID" || { echo 'Configure AZURE_BOOTSTRAP_CLIENT_ID in azure-bootstrap using an existing authorized GitHub OIDC identity.'; exit 1; }
+      - name: Azure login
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - name: Apply the resource group and deployment identity through Bicep
+        run: |
+          set -euo pipefail
+          az deployment sub create \
+            --subscription "$AZURE_SUBSCRIPTION_ID" --location westus2 \
+            --name "caes-ai-bootstrap-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}" \
+            --template-file infrastructure/azure/bootstrap.bicep \
+            --query properties.outputs --output json > "$RUNNER_TEMP/caes-ai-bootstrap-outputs.json"
+          jq -e '.deploymentGuardPassed.value == true' "$RUNNER_TEMP/caes-ai-bootstrap-outputs.json"
+          client_id="$(jq -r '.clientId.value' "$RUNNER_TEMP/caes-ai-bootstrap-outputs.json")"
+          printf 'Set the test environment variable `AZURE_CLIENT_ID` to `%s`.\n\nThe test resource group and its deployment identity are ready.\n' "$client_id" >> "$GITHUB_STEP_SUMMARY"

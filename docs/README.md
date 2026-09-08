@@ -12,3 +12,5 @@
 Start with the [root README](../README.md) for setup and commands. Each
 [application](../apps/README.md) and [shared package](../packages/README.md) also has
 its own README. Current architecture decisions are documented in these guides.
+
+- [Azure test deployment](../infrastructure/azure/README.md): Bicep, Actions, first-run identity setup and runtime verification.

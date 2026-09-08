@@ -151,6 +151,7 @@ export function buildApp({
 
   app.get("/health", () => ({
     status: "ok",
+    releaseSha: config.releaseSha,
     provider: modelProvider.name,
     model: config.modelProfiles?.default || config.defaultModel,
     transport: modelProvider.transport,
