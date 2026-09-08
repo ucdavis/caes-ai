@@ -2,6 +2,17 @@
 
 React bindings for embedding a CAES AI assistant. The root entry contains the headless runtime. Accessible UI components and the starter theme are separate opt-in exports. Host applications own their layout, branding, structured renderers, client tools, and typed UI-effect handlers.
 
+## Install the beta
+
+```bash
+npm install @ucdavis/caes-ai-assistant-react@beta
+```
+
+Requires React and React DOM 18 or later. npm also resolves the declared
+`@tanstack/ai` and `@tanstack/ai-react` peer dependencies. The CAES AI public types
+remain independent of those libraries; hosts that use TanStack AI directly must
+keep their versions within the package's peer ranges.
+
 ## Starter UI
 
 ```tsx

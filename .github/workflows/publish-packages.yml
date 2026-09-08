@@ -1,0 +1,113 @@
+name: Publish beta packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      registry:
+        description: Registry to publish to
+        type: choice
+        options: [all, npm, nuget]
+        default: all
+        required: true
+      version:
+        description: Expected beta version in the checked-in package manifests
+        type: string
+        default: 0.2.0-beta.0
+        required: true
+      npm_auth:
+        description: Use bootstrap only for the first npm upload before trusted publishing is configured
+        type: choice
+        options: [trusted, bootstrap]
+        default: trusted
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-packages
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+
+  publish:
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: package-publishing
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+      DOTNET_NOLOGO: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: "22"
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Use npm 11.19.1
+        run: npm install --global npm@11.19.1
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: "10.0.x"
+      - name: Verify the requested beta version
+        env:
+          EXPECTED_VERSION: ${{ inputs.version }}
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          import assert from 'node:assert/strict';
+          const expected = process.env.EXPECTED_VERSION;
+          assert.match(expected, /^\d+\.\d+\.\d+-beta\.\d+$/);
+          for (const path of ['packages/protocol', 'packages/assistant-react']) {
+            const pkg = JSON.parse(readFileSync(`${path}/package.json`, 'utf8'));
+            assert.equal(pkg.version, expected, `${pkg.name} version`);
+          }
+          const project = readFileSync('packages/UCDavis.CaesAi.AppSdk/UCDavis.CaesAi.AppSdk.csproj', 'utf8');
+          const prefix = project.match(/<VersionPrefix>([^<]+)<\/VersionPrefix>/)?.[1];
+          const suffix = project.match(/<VersionSuffix>([^<]+)<\/VersionSuffix>/)?.[1];
+          assert.equal(`${prefix}-${suffix}`, expected, 'NuGet version');
+          NODE
+      - name: Build and pack the release
+        run: |
+          npm ci
+          npm run build:packages
+          npm run pack:protocol
+          npm run pack:assistant
+          npm run pack:dotnet
+      - name: Retain the package artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: beta-packages-${{ inputs.version }}
+          path: artifacts/*
+          if-no-files-found: error
+      - name: Publish npm packages
+        if: inputs.registry == 'all' || inputs.registry == 'npm'
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          NODE_AUTH_TOKEN: ${{ inputs.npm_auth == 'bootstrap' && secrets.NPM_BOOTSTRAP_TOKEN || '' }}
+        run: npm run release:publish
+      - name: Obtain a short-lived NuGet publishing credential
+        if: inputs.registry == 'all' || inputs.registry == 'nuget'
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1
+        id: nuget-login
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - name: Publish the NuGet package
+        if: inputs.registry == 'all' || inputs.registry == 'nuget'
+        env:
+          NUGET_API_KEY: ${{ steps.nuget-login.outputs.NUGET_API_KEY }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: >-
+          dotnet nuget push "artifacts/UCDavis.CaesAi.AppSdk.${RELEASE_VERSION}.nupkg"
+          --api-key "$NUGET_API_KEY"
+          --source https://api.nuget.org/v3/index.json
+          --skip-duplicate

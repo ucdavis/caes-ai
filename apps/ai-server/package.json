@@ -27,7 +27,7 @@
     "@opentelemetry/sdk-node": "^0.222.0",
     "@tanstack/ai": "^0.52.1",
     "@tanstack/ai-openai": "^0.22.3",
-    "@ucdavis/caes-ai-protocol": "^0.1.0",
+    "@ucdavis/caes-ai-protocol": "^0.2.0-beta.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "dotenv": "^17.2.3",
