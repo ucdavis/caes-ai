@@ -70,6 +70,8 @@ jobs:
         run: npm run test:js
       - name: Test .NET SDK and Todo API
         run: npm run test:dotnet
+      - name: Test Azure bootstrap CLI without cloud access
+        run: npm run test:azure
       - name: Compile Azure Bicep templates
         run: |
           az bicep install --version v0.46.1
