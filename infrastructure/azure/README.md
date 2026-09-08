@@ -150,12 +150,18 @@ gh workflow run deploy-azure-test.yml --repo ucdavis/caes-ai --ref main \
 The workflow runs the full CI suite, builds a ZIP from the checked-out server and
 protocol, installs locked production dependencies, and retains the artifact. It
 optionally applies Bicep, verifies that the target app uses DefaultPlan2, waits for
-SCM, uploads the ZIP using Azure OIDC and then verifies:
+SCM, uploads the ZIP using Azure OIDC, restarts the app after package activation
+and then verifies:
 
 - `/health` reports the exact deployed commit.
 - `/ready` can query PostgreSQL after startup migrations.
 - Unauthenticated session creation returns 401.
 - JWKS is available and contains only public ES256 key material.
+
+The explicit restart handles a first upload racing the empty site's cold start.
+App Service can fail to remount the new package into that starting container even
+when OneDeploy reports success. Restart runs after package activation, through
+Actions, so the new process starts with the complete package already present.
 
 These checks do not call OpenAI or prove an application callback. Register a real
 application and perform a complete chat/tool request separately. The Todo example

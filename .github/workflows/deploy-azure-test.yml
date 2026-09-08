@@ -121,6 +121,14 @@ jobs:
         with:
           app-name: ${{ steps.app.outputs.name }}
           package: artifacts/caes-ai-server.zip
+      - name: Restart after package activation
+        env:
+          WEB_APP_NAME: ${{ steps.app.outputs.name }}
+        # A first upload can race the empty site's cold start and fail its package remount.
+        # Restart only after OneDeploy has finished activating the complete package.
+        run: |
+          az webapp restart --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --resource-group "$RESOURCE_GROUP" --name "$WEB_APP_NAME"
       - name: Verify the deployed commit, database and authentication
         env:
           APP_URL: ${{ steps.app.outputs.url }}
