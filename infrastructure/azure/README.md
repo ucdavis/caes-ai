@@ -1,0 +1,155 @@
+# Azure test deployment
+
+The central server runs as one Node 22 process on the existing Linux
+`DefaultPlan2` in `Default-Web-WestUS`, West US 2. The plan is referenced, not
+created or resized. All CAES AI resources belong to `rg-caes-ai-test` in the
+CAES Test subscription `105dede4-4731-492e-8c28-5121226319b0`.
+There is no production workflow or production template parameter.
+
+Infrastructure and App Service settings are applied by Bicep from GitHub Actions.
+The Actions workflow then uploads a prebuilt ZIP with Azure's deployment action.
+Normal package deployments leave app settings and infrastructure alone, following
+the separation used by Leaves. No Azure deployment should be run from a laptop.
+
+## Resources
+
+| Resource | Test configuration |
+| --- | --- |
+| Existing App Service plan | `DefaultPlan2`, Linux B1, one instance, unchanged |
+| App Service | `web-caes-ai-test-<suffix>`, Node 22, HTTPS, Always On, `/ready` health check |
+| PostgreSQL Flexible Server | `pg-caes-ai-test-<suffix>`, PostgreSQL 17, `Standard_B1ms`, 1 vCPU, 2 GiB RAM |
+| Database storage | 32 GiB, seven-day backups, no HA, no geo-redundant backup, no automatic storage growth |
+| Database | `caesai`, startup-managed Drizzle migrations |
+| Deployment identity | `id-caes-ai-github-test`, GitHub OIDC, Contributor on the test resource group and Web Plan Contributor on DefaultPlan2 only |
+
+PostgreSQL uses TLS with certificate verification. Its public endpoint permits
+only the App Service's possible outbound IP addresses. It does not enable the
+all-Azure-services firewall exception or laptop/GitHub runner database access.
+The central service applies migrations from inside App Service before listening.
+Rerun Bicep if the app's possible outbound addresses change. Full changes to the
+firewall address set may leave old rules under incremental ARM deployment; review
+and retire obsolete rules through Bicep before any network/topology migration.
+
+The shared B1 plan has limited memory. CAES AI starts one process with a 256 MiB
+JavaScript heap ceiling. This is not a cap on total process memory. Check the
+shared plan's capacity before load testing; this deployment does not resize it.
+
+## First-run identity setup
+
+A GitHub workflow needs an Azure identity before it can provision its own deployment
+identity. `bootstrap-azure-test.yml` therefore uses an existing authorized bootstrap
+identity. It does not copy a developer's cached Azure login into GitHub.
+
+1. Configure the `azure-bootstrap` GitHub environment to allow only `main`.
+2. Set its `AZURE_BOOTSTRAP_CLIENT_ID` variable to an existing Azure identity that
+   trusts the GitHub OIDC subject
+   `repo:ucdavis/caes-ai:environment:azure-bootstrap`, issuer
+   `https://token.actions.githubusercontent.com`, audience `api://AzureADTokenExchange`.
+3. That identity needs permission to create the test resource group, managed
+   identity, federated credential, and role assignments in the test subscription.
+   Contributor plus Role Based Access Control Administrator at the necessary
+   scopes, or an approved bootstrap Owner identity, can perform this setup.
+   It also needs permission to create a role assignment on DefaultPlan2.
+4. Run **Bootstrap Azure test identity** from `main`. It applies `bootstrap.bicep`
+   and prints only the new client ID in the Actions summary.
+5. Set `AZURE_CLIENT_ID` in the `test` GitHub environment to that client ID. This
+   environment must also permit deployments only from `main`.
+
+The permanent deployment identity is a user-assigned managed identity. This keeps
+bootstrap in standard Azure Resource Manager Bicep and avoids Microsoft Graph app
+registration permissions. Its federation is bound to `repo:ucdavis/caes-ai:environment:test`.
+If GitHub's OIDC subject customization changes, update the allowed subject and
+federated credential together through the bootstrap workflow.
+
+If no bootstrap identity exists, an administrator must establish that first trust
+through an already-authorized infrastructure workflow. The workflow cannot grant
+itself its initial Azure access. The Leaves identity is scoped to Leaves and
+must not be reused to deploy CAES AI without a separate access decision.
+
+## GitHub test configuration
+
+Create the `test` environment and restrict it to `main`. Generate the two
+CAES AI-owned secrets without printing them:
+
+```bash
+node scripts/azure/initialize-secrets.mjs
+```
+
+The helper requires `gh` access to `ucdavis/caes-ai`, writes directly to GitHub
+Secrets and preserves existing values. It does not deploy Azure resources.
+
+| Name | Kind | Purpose |
+| --- | --- | --- |
+| `AZURE_CLIENT_ID` | Variable | Permanent test deployment identity from bootstrap |
+| `POSTGRES_ADMIN_PASSWORD` | Secret | Generated database credential. Keep stable across configuration runs. |
+| `CALLBACK_SIGNING_KEYS_JSON` | Secret | Generated version 1 key ring. Keep stable across deployments. |
+| `OPENAI_API_KEY` | Secret | Required provider credential, supplied by the service owner |
+| `OPENAI_DEFAULT_MODEL` | Optional variable | Defaults to the server's `gpt-5.6-luna` model |
+| `OPENAI_ALLOWED_MODELS` | Optional variable | Comma-separated allowlist, defaults to the default model |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | Optional variable | Trusted OTLP HTTP/protobuf collector |
+| `OTEL_EXPORTER_OTLP_HEADERS` | Optional secret | Collector authorization headers |
+
+The subscription, tenant, resource group and plan are fixed in the workflow and
+templates. They do not accept production targets. Secure Bicep parameters protect
+secret values in deployment history. Parameter files are created with mode 0600
+in the runner temporary directory, removed after use and never uploaded.
+
+App Service stores the provider key, database URL and callback key ring as protected
+app settings. The startup wrapper loads signing material through a mode-0600
+temporary file, removes the environment value before loading telemetry, and deletes
+the file once the existing signer has loaded it into memory. Every deployment
+receives the same configured key ring, so JWKS and callback verification survive
+process and container replacement. This is protected deployment secret storage,
+not managed Key Vault signing. Do not regenerate the key ring on each deploy.
+Automatic signing-key rotation remains deferred. For a planned rotation, preserve
+old keys for verification overlap and update the configured ring through Bicep.
+
+## Deploy
+
+Merge the reviewed deployment changes to `main` first. For the initial deployment
+or an intentional configuration change:
+
+```bash
+gh workflow run deploy-azure-test.yml --repo ucdavis/caes-ai --ref main \
+  -f configure_infrastructure=true
+```
+
+For later application-only deployments, leave the input false:
+
+```bash
+gh workflow run deploy-azure-test.yml --repo ucdavis/caes-ai --ref main \
+  -f configure_infrastructure=false
+```
+
+The workflow runs the full CI suite, builds a ZIP from the checked-out server and
+protocol, installs locked production dependencies, and retains the artifact. It
+optionally applies Bicep, verifies that the target app uses DefaultPlan2, waits for
+SCM, uploads the ZIP using Azure OIDC and then verifies:
+
+- `/health` reports the exact deployed commit.
+- `/ready` can query PostgreSQL after startup migrations.
+- Unauthenticated session creation returns 401.
+- JWKS is available and contains only public ES256 key material.
+
+These checks do not call OpenAI or prove an application callback. Register a real
+application and perform a complete chat/tool request separately. The Todo example
+is not included in this deployment. There is no browser UI in the central service.
+An OTLP destination is optional for the test deployment but required before the
+first application beta acceptance described in `docs/beta-milestone.md`.
+
+## Local verification and recovery
+
+`npm run pack:server` requires `RELEASE_SHA` and prebuilt server/protocol packages.
+Its ZIP contains compiled code, migrations, runtime dependencies and release
+metadata. CI unpacks it into an isolated directory and verifies real PostgreSQL
+startup, authentication, a stable JWKS after restart and a secret-safe failure
+for malformed signing configuration. It also compiles both Bicep templates.
+
+The database tests and package smoke test require the isolated local database
+from the root README. They do not read the development `.env` or use a provider key.
+
+A failed package upload can be retried through the workflow without rewriting
+configuration. Deploying an older package is only safe if its database schema is
+compatible with migrations already applied. PostgreSQL backups do not back up
+GitHub secrets. Preserve access to the deployment secrets before deleting an app
+or replacing its configuration. No automatic rollback or resource deletion runs.

@@ -26,3 +26,15 @@ dispatched workflow restricted to `main`. It calls the same CI workflow before
 publishing, checks the requested beta version, retains package artifacts, and uses
 registry trusted publishing in the `package-publishing` environment. npm and NuGet
 can be selected separately. See [registry setup](../docs/package-releases.md).
+
+CI also compiles the Azure Bicep templates and runs **Verify the App Service package
+against PostgreSQL**. That check unpacks the server ZIP, starts its production
+entry point, verifies authentication and commit metadata, and restarts it to
+confirm that the configured signing key stays stable.
+
+[bootstrap-azure-test.yml](workflows/bootstrap-azure-test.yml) and
+[deploy-azure-test.yml](workflows/deploy-azure-test.yml) are manual, `main`-only
+workflows. Bootstrap creates the dedicated deployment identity using an existing
+authorized identity. Deployment uses Bicep for infrastructure and app settings,
+then uploads the prebuilt ZIP and checks the deployed service. Neither workflow
+accepts a production target. See the [Azure guide](../infrastructure/azure/README.md).

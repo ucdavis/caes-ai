@@ -26,9 +26,10 @@ boundary beyond the simulated Todo user.
 Deploy one central instance with PostgreSQL, HTTPS, exact application origins,
 protected persistent callback signing material and the team's OTEL destination.
 Verify readiness, migrations, JWKS verification, session continuity after a restart,
-and a complete Walter request through the deployed services. Package distribution
-and deployment credentials are separate setup work; CI builds packages without
-publishing them or deploying the service.
+and a complete Walter request through the deployed services. Package publishing and the test-only Azure deployment have separate manual
+GitHub Actions workflows. CI validates packages and the server ZIP without
+publishing or deploying them. See the [Azure guide](../infrastructure/azure/README.md)
+for the initial deployment identity and provider credential requirements.
 
 ## Scope decisions
 

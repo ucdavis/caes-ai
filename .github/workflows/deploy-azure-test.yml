@@ -1,0 +1,132 @@
+name: Deploy Azure test
+
+on:
+  workflow_dispatch:
+    inputs:
+      configure_infrastructure:
+        description: Apply Bicep infrastructure and app settings before deploying the package. Required for the first deployment.
+        type: boolean
+        default: false
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: azure-test
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    environment: test
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+      AZURE_SUBSCRIPTION_ID: 105dede4-4731-492e-8c28-5121226319b0
+      AZURE_TENANT_ID: a8046f64-66c0-4f00-9046-c8daf92ff62b
+      RESOURCE_GROUP: rg-caes-ai-test
+      RELEASE_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Validate deployment identity
+        run: |
+          test -n "$AZURE_CLIENT_ID" || { echo 'Set test environment variable AZURE_CLIENT_ID after the bootstrap workflow.'; exit 1; }
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Use npm 11.19.1
+        run: npm install --global npm@11.19.1
+      - name: Build the server deployment package
+        run: |
+          npm ci
+          npm run build --workspace @ucdavis/caes-ai-protocol --workspace @ucdavis/caes-ai-server
+          npm run pack:server
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: azure-test-${{ github.sha }}-${{ github.run_attempt }}
+          path: artifacts/caes-ai-server.zip
+          if-no-files-found: error
+      - name: Azure login
+        uses: azure/login@7ddb5af1ef8758cf1353cf3b42f940aee27ba21c # v3.0.2
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+      - name: Apply test infrastructure and configuration
+        if: inputs.configure_infrastructure
+        env:
+          POSTGRES_ADMIN_PASSWORD: ${{ secrets.POSTGRES_ADMIN_PASSWORD }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CALLBACK_SIGNING_KEYS_JSON: ${{ secrets.CALLBACK_SIGNING_KEYS_JSON }}
+          OPENAI_DEFAULT_MODEL: ${{ vars.OPENAI_DEFAULT_MODEL }}
+          OPENAI_ALLOWED_MODELS: ${{ vars.OPENAI_ALLOWED_MODELS }}
+          OTEL_EXPORTER_OTLP_ENDPOINT: ${{ vars.OTEL_EXPORTER_OTLP_ENDPOINT }}
+          OTEL_EXPORTER_OTLP_HEADERS: ${{ secrets.OTEL_EXPORTER_OTLP_HEADERS }}
+        run: |
+          set -euo pipefail
+          parameter_file="$RUNNER_TEMP/caes-ai-azure-parameters.json"
+          trap 'rm -f "$parameter_file"' EXIT
+          node scripts/azure/parameters.mjs "$parameter_file"
+          az deployment group create \
+            --subscription "$AZURE_SUBSCRIPTION_ID" \
+            --resource-group "$RESOURCE_GROUP" \
+            --name "caes-ai-test-${GITHUB_RUN_NUMBER}-${GITHUB_RUN_ATTEMPT}" \
+            --template-file infrastructure/azure/main.bicep \
+            --parameters "@$parameter_file" \
+            --query properties.outputs --output json > "$RUNNER_TEMP/caes-ai-azure-outputs.json"
+          jq -e '.deploymentGuardPassed.value == true' "$RUNNER_TEMP/caes-ai-azure-outputs.json"
+      - name: Resolve test App Service
+        id: app
+        run: |
+          set -euo pipefail
+          apps="$(az webapp list --subscription "$AZURE_SUBSCRIPTION_ID" --resource-group "$RESOURCE_GROUP" \
+            --query "[?tags.application=='caes-ai' && tags.environment=='test'].{name:name,host:defaultHostName,plan:serverFarmId}" -o json)"
+          test "$(jq length <<< "$apps")" = 1
+          plan="$(jq -r '.[0].plan | ascii_downcase' <<< "$apps")"
+          test "$plan" = '/subscriptions/105dede4-4731-492e-8c28-5121226319b0/resourcegroups/default-web-westus/providers/microsoft.web/serverfarms/defaultplan2'
+          echo "name=$(jq -r '.[0].name' <<< "$apps")" >> "$GITHUB_OUTPUT"
+          echo "url=https://$(jq -r '.[0].host' <<< "$apps")" >> "$GITHUB_OUTPUT"
+      - name: Wait for SCM readiness
+        env:
+          WEB_APP_NAME: ${{ steps.app.outputs.name }}
+        run: |
+          set -euo pipefail
+          ready_count=0
+          for attempt in {1..30}; do
+            status="$(curl --silent --output /dev/null --write-out '%{http_code}' --max-time 10 "https://${WEB_APP_NAME}.scm.azurewebsites.net/api/settings" || true)"
+            if [[ "$status" == 200 || "$status" == 401 ]]; then
+              ready_count=$((ready_count + 1))
+              if (( ready_count >= 2 )); then exit 0; fi
+            else
+              ready_count=0
+            fi
+            sleep 5
+          done
+          echo 'SCM did not become ready.'
+          exit 1
+      - name: Deploy the built package
+        uses: azure/webapps-deploy@02a81bead70021f5284939794bcec79c271ab383 # v3
+        with:
+          app-name: ${{ steps.app.outputs.name }}
+          package: artifacts/caes-ai-server.zip
+      - name: Verify the deployed commit, database and authentication
+        env:
+          APP_URL: ${{ steps.app.outputs.url }}
+        run: node scripts/azure/verify-deployment.mjs
+      - name: Record the deployment
+        env:
+          APP_URL: ${{ steps.app.outputs.url }}
+        run: |
+          printf 'Test service: %s\n\nCommit: `%s`\n\nVerified PostgreSQL readiness, session authentication and public JWKS.\n' "$APP_URL" "$RELEASE_SHA" >> "$GITHUB_STEP_SUMMARY"

@@ -248,9 +248,16 @@ dist-tag and a NuGet prerelease version. See [package releases](docs/package-rel
 for installation, registry setup and the manual publishing workflow. Publishing
 these libraries does not deploy the central server.
 
+## Azure test deployment
+
+The [Azure deployment guide](infrastructure/azure/README.md) covers the test-only
+GitHub Actions workflows, Bicep infrastructure, DefaultPlan2 hosting, PostgreSQL
+and required first-run identity setup. The deployable ZIP is tested independently
+of the source checkout. Production deployment is not configured.
+
 ## Known limitations
 
-- Application API keys and a direct-database administration CLI remain the current administration model. Sessions and operational metadata are durable, but session revocation and retention jobs are not implemented. The file-backed callback signer survives restarts and supports overlap rotation, but deployment must mount it from protected secret storage or replace it with a managed signer.
+- Application API keys and a direct-database administration CLI remain the current administration model. Sessions and operational metadata are durable, but session revocation and retention jobs are not implemented. The local file-backed callback signer survives restarts and supports overlap rotation. Azure test hosting supplies the same key ring through protected deployment settings; managed signing and automatic rotation remain future work.
 - The Todo app uses one simulated user and `EnsureCreated`, not authentication or a migration pipeline.
 - OpenAI is the only production provider implementation, chat history is browser-local, and CAES AI intentionally stores no transcript in this version.
 - Automated server tests inject a private scripted model provider. Runtime configuration has no fake-model mode, and Playwright exercises the live provider.

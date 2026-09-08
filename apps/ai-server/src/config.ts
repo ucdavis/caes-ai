@@ -2,6 +2,7 @@ import type { ReasoningEffort } from "@ucdavis/caes-ai-protocol";
 
 export interface ServerConfig {
   host: string;
+  releaseSha?: string | undefined;
   port: number;
   publicBaseUrl: string;
   sessionTtlMs: number;
@@ -96,6 +97,7 @@ export function loadConfig(): ServerConfig {
   }
 
   return {
+    releaseSha: process.env.CAES_AI_RELEASE_SHA?.trim() || undefined,
     host: process.env.CAES_AI_HOST?.trim() || "0.0.0.0",
     port: Number(process.env.CAES_AI_PORT || 4310),
     publicBaseUrl,

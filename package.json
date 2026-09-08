@@ -37,7 +37,8 @@
     "test:e2e": "npm run test --workspace @ucdavis/caes-ai-e2e --",
     "test:db:up": "docker compose --env-file /dev/null -f compose.test.yml up -d --wait",
     "test:db:down": "docker compose --env-file /dev/null -f compose.test.yml down --volumes",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "pack:server": "node scripts/package-server.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^3.0.1",

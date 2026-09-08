@@ -61,3 +61,11 @@ The administration CLI uses direct database credentials. Run `npm run caes-ai --
 or follow the [administration guide](../../README.md#application-administration)
 to register applications and rotate keys. `scripts/dev/` contains the separate Todo
 bootstrap; it is not part of normal server startup or test setup.
+
+## Azure test hosting
+
+The [Azure deployment guide](../../infrastructure/azure/README.md) describes the
+Bicep and GitHub Actions setup for DefaultPlan2 and a small PostgreSQL server.
+`npm run pack:server` builds the standalone deployment ZIP after compilation.
+The Azure startup wrapper loads a stable signing key ring from protected app settings.
+`/health` includes the deployed source commit when release metadata is configured.
