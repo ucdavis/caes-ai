@@ -77,7 +77,13 @@ There is no production target today.
 
 The permanent deployment identity is a user-assigned managed identity. Bootstrap
 uses Azure Resource Manager Bicep and needs no Microsoft Graph app registration
-permissions. Its federation is bound to `repo:ucdavis/caes-ai:environment:test`.
+permissions. Its federation is bound to
+`repo:ucdavis@573450/caes-ai@1357492545:environment:test`, matching the owner and
+repository IDs in GitHub's actual token. Check `sub_claim_prefix` from
+`gh api repos/ucdavis/caes-ai/actions/oidc/customization/sub` and the Azure login
+step's subject claim when diagnosing a trust mismatch. The API's
+`use_immutable_subject: false` does not imply the older name-only format for new
+repositories. See [GitHub's OIDC reference](https://docs.github.com/en/actions/reference/security/oidc#immutable-subject-claims).
 If GitHub's OIDC subject customization or deployment permissions change, update
 the bootstrap Bicep and rerun the script. Ordinary infrastructure and server
 changes use **Deploy Azure test**. No separate bootstrap workflow or
