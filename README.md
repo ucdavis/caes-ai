@@ -251,7 +251,7 @@ these libraries does not deploy the central server.
 ## Azure test deployment
 
 The [Azure deployment guide](infrastructure/azure/README.md) covers the test-only
-GitHub Actions workflows, Bicep infrastructure, DefaultPlan2 hosting, PostgreSQL
+GitHub Actions deployment workflow, Bicep infrastructure, DefaultPlan2 hosting, PostgreSQL
 and required first-run identity setup. The deployable ZIP is tested independently
 of the source checkout. Production deployment is not configured.
 

@@ -32,9 +32,12 @@ against PostgreSQL**. That check unpacks the server ZIP, starts its production
 entry point, verifies authentication and commit metadata, and restarts it to
 confirm that the configured signing key stays stable.
 
-[bootstrap-azure-test.yml](workflows/bootstrap-azure-test.yml) and
-[deploy-azure-test.yml](workflows/deploy-azure-test.yml) are manual, `main`-only
-workflows. Bootstrap creates the dedicated deployment identity using an existing
-authorized identity. Deployment uses Bicep for infrastructure and app settings,
-then uploads the prebuilt ZIP and checks the deployed service. Neither workflow
-accepts a production target. See the [Azure guide](../infrastructure/azure/README.md).
+**Test Azure bootstrap CLI without cloud access** checks preview, target validation,
+deployment failures and GitHub variable updates using fake Azure and GitHub CLIs.
+
+[deploy-azure-test.yml](workflows/deploy-azure-test.yml) is a manual, `main`-only
+workflow. A local `npm run azure:bootstrap -- test --apply` first creates the
+deployment identity through Bicep and saves its client ID in GitHub. Subsequent
+deployment uses Actions for Bicep infrastructure and app settings, then uploads
+the prebuilt ZIP and checks the deployed service. Only test is configured.
+See the [Azure guide](../infrastructure/azure/README.md).

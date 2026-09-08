@@ -9,7 +9,9 @@ There is no production workflow or production template parameter.
 Infrastructure and App Service settings are applied by Bicep from GitHub Actions.
 The Actions workflow then uploads a prebuilt ZIP with Azure's deployment action.
 Normal package deployments leave app settings and infrastructure alone, following
-the separation used by Leaves. No Azure deployment should be run from a laptop.
+the separation used by Leaves. The one-time identity bootstrap runs locally through
+Bicep using an administrator's Azure CLI login. Application infrastructure, settings
+and package deployments run only through GitHub Actions.
 
 ## Resources
 
@@ -36,35 +38,50 @@ shared plan's capacity before load testing; this deployment does not resize it.
 
 ## First-run identity setup
 
-A GitHub workflow needs an Azure identity before it can provision its own deployment
-identity. `bootstrap-azure-test.yml` therefore uses an existing authorized bootstrap
-identity. It does not copy a developer's cached Azure login into GitHub.
+Run bootstrap once per environment using Node 22+, Azure CLI with Bicep, and the
+GitHub CLI. Sign in with `az login` and `gh auth login`. Your Azure account needs
+permission to create the resource group, managed identity, federated credential
+and role assignments in the target subscription, including a role assignment on
+DefaultPlan2. Contributor plus Role Based Access Control Administrator at the
+necessary scopes, or Owner, can perform this setup. Your GitHub account needs
+access to set environment variables in `ucdavis/caes-ai`.
 
-1. Configure the `azure-bootstrap` GitHub environment to allow only `main`.
-2. Set its `AZURE_BOOTSTRAP_CLIENT_ID` variable to an existing Azure identity that
-   trusts the GitHub OIDC subject
-   `repo:ucdavis/caes-ai:environment:azure-bootstrap`, issuer
-   `https://token.actions.githubusercontent.com`, audience `api://AzureADTokenExchange`.
-3. That identity needs permission to create the test resource group, managed
-   identity, federated credential, and role assignments in the test subscription.
-   Contributor plus Role Based Access Control Administrator at the necessary
-   scopes, or an approved bootstrap Owner identity, can perform this setup.
-   It also needs permission to create a role assignment on DefaultPlan2.
-4. Run **Bootstrap Azure test identity** from `main`. It applies `bootstrap.bicep`
-   and prints only the new client ID in the Actions summary.
-5. Set `AZURE_CLIENT_ID` in the `test` GitHub environment to that client ID. This
-   environment must also permit deployments only from `main`.
+Create the `test` GitHub environment and restrict it to `main` before applying.
+From the repository root, preview the changes and then apply them:
 
-The permanent deployment identity is a user-assigned managed identity. This keeps
-bootstrap in standard Azure Resource Manager Bicep and avoids Microsoft Graph app
-registration permissions. Its federation is bound to `repo:ucdavis/caes-ai:environment:test`.
-If GitHub's OIDC subject customization changes, update the allowed subject and
-federated credential together through the bootstrap workflow.
+```bash
+npm run azure:bootstrap -- test --what-if
+npm run azure:bootstrap -- test --apply
+```
 
-If no bootstrap identity exists, an administrator must establish that first trust
-through an already-authorized infrastructure workflow. The workflow cannot grant
-itself its initial Azure access. The Leaves identity is scoped to Leaves and
-must not be reused to deploy CAES AI without a separate access decision.
+The [bootstrap script](../../scripts/azure/bootstrap.mjs) selects an explicit
+subscription and checks its tenant without changing your default Azure account.
+Preview runs Azure what-if without modifying Azure or GitHub. Apply runs
+[bootstrap.bicep](bootstrap.bicep), validates its outputs and saves `AZURE_CLIENT_ID`
+in the `test` GitHub environment. It creates `rg-caes-ai-test`, the permanent
+managed identity, GitHub OIDC trust and scoped permissions. It does not create the
+web app or database, generate secrets, or start the deployment workflow.
+
+Rerunning apply uses the same resource and role assignment identities. If Azure
+succeeds but saving the GitHub variable fails, the script reports the client ID;
+fix GitHub access and rerun, or save that ID in the environment manually. Do not
+run bootstrap concurrently with another bootstrap or deployment to that environment.
+Azure what-if may mark the plan role assignment as unsupported because its
+principal ID depends on the identity module. Preview is not a permission check.
+
+The command accepts an environment name, but only `test` is configured. Unknown
+environments are rejected before any CLI call. To add another environment, review
+its Bicep target, subscription, tenant, resource group, plan and GitHub OIDC subject,
+then add a target entry in the script and a corresponding deployment workflow.
+There is no production target today.
+
+The permanent deployment identity is a user-assigned managed identity. Bootstrap
+uses Azure Resource Manager Bicep and needs no Microsoft Graph app registration
+permissions. Its federation is bound to `repo:ucdavis/caes-ai:environment:test`.
+If GitHub's OIDC subject customization or deployment permissions change, update
+the bootstrap Bicep and rerun the script. Ordinary infrastructure and server
+changes use **Deploy Azure test**. No separate bootstrap workflow or
+`azure-bootstrap` GitHub environment is needed.
 
 ## GitHub test configuration
 

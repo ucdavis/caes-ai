@@ -8,6 +8,7 @@
     "npm": "^11.19.1"
   },
   "scripts": {
+    "azure:bootstrap": "node scripts/azure/bootstrap.mjs",
     "build": "npm run build --workspaces --if-present && npm run build:dotnet",
     "build:dotnet": "dotnet build apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
     "build:packages": "npm run build --workspace @ucdavis/caes-ai-protocol --workspace @ucdavis/caes-ai-assistant-react",
@@ -31,7 +32,8 @@
     "predev": "npm run build:packages && npm run db:up && npm run db:setup",
     "pretest:e2e": "npm run build:packages",
     "pretest:js": "npm run build:packages",
-    "test": "npm run test:js && npm run test:dotnet",
+    "test": "npm run test:js && npm run test:azure && npm run test:dotnet",
+    "test:azure": "node --test scripts/azure/bootstrap.test.mjs",
     "test:dotnet": "dotnet test apps/todo-app/UCDavis.CaesAi.Todo.slnx --no-restore",
     "test:js": "npm run test --workspace @ucdavis/caes-ai-protocol --workspace @ucdavis/caes-ai-assistant-react --workspace @ucdavis/caes-ai-server --workspace @ucdavis/caes-ai-todo-web",
     "test:e2e": "npm run test --workspace @ucdavis/caes-ai-e2e --",
