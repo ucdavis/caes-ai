@@ -89,6 +89,9 @@ Secrets and preserves existing values. It does not deploy Azure resources.
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Optional variable | Trusted OTLP HTTP/protobuf collector |
 | `OTEL_EXPORTER_OTLP_HEADERS` | Optional secret | Collector authorization headers |
 
+Providing an OTLP endpoint enables `CAES_AI_OTEL_ENABLED`; leaving it empty keeps
+telemetry export disabled. The server uses HTTP/protobuf for traces and metrics.
+
 The subscription, tenant, resource group and plan are fixed in the workflow and
 templates. They do not accept production targets. Secure Bicep parameters protect
 secret values in deployment history. Parameter files are created with mode 0600

@@ -67,6 +67,7 @@ resource webApp 'Microsoft.Web/sites@2024-11-01' = if (guardPassed) {
         { name: 'OPENAI_DEFAULT_MODEL', value: defaultModel }
         { name: 'OPENAI_ALLOWED_MODELS', value: allowedModels }
         { name: 'DATABASE_URL', value: databaseUrl }
+        { name: 'CAES_AI_OTEL_ENABLED', value: empty(otelEndpoint) ? 'false' : 'true' }
         { name: 'OTEL_SERVICE_NAME', value: 'caes-ai.test' }
         { name: 'OTEL_RESOURCE_ATTRIBUTES', value: 'deployment.environment.name=test,service.namespace=caes-ai' }
         { name: 'OTEL_EXPORTER_OTLP_PROTOCOL', value: 'http/protobuf' }
