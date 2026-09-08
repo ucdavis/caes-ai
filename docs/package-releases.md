@@ -43,9 +43,11 @@ On NuGet.org, create a GitHub Actions trusted publishing policy with the same
 repository, workflow filename and environment. Choose the intended package owner
 (your account or the team's organization). Scope it to `UCDavis.CaesAi.AppSdk`,
 allowing both new packages and new versions. Set the GitHub repository or
-environment variable `NUGET_USER` to the NuGet username used for that policy.
-For this repository, `NUGET_USER` is `ucdotnetadmin`. NuGet trusted publishing can
-create the first package; no initial API key is required.
+environment variable `NUGET_USER` to the personal NuGet username that created the
+policy. This login is distinct from the package owner: CAES AI's package owner is
+`ucdotnetadmin`. Supplying the organization/package owner as the login can fail
+with "No matching trust policy owned by user". NuGet trusted publishing can create
+the first package; no initial API key is required.
 
 These connections let GitHub obtain short-lived publishing credentials. npm also
 attaches provenance when publishing from this workflow. Neither registry needs a
@@ -66,7 +68,9 @@ References: [npm trusted publishers](https://docs.npmjs.com/trusted-publishers/)
    `trusted` npm authentication after the first upload.
 4. The workflow runs the existing builds, JavaScript/PostgreSQL tests, .NET tests
    and static checks before packing and publishing. Its artifact upload retains
-   the three package files even if a later registry upload fails.
+   the three package files even if a later registry upload fails. Each run attempt
+   gets its own artifact name, so rerunning failed jobs preserves earlier files
+   and avoids an upload-name conflict.
 5. Verify the versions and npm tag in the registries, then install the published
    packages in a fresh consumer project. A successful upload alone does not prove
    dependency resolution or package usability.
