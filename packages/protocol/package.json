@@ -1,7 +1,14 @@
 {
   "name": "@ucdavis/caes-ai-protocol",
-  "version": "0.1.0",
+  "version": "0.2.0-beta.0",
   "description": "Runtime-validated wire contracts for CAES AI applications.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ucdavis/caes-ai.git",
+    "directory": "packages/protocol"
+  },
+  "homepage": "https://github.com/ucdavis/caes-ai/tree/main/packages/protocol",
+  "bugs": "https://github.com/ucdavis/caes-ai/issues",
   "type": "module",
   "sideEffects": false,
   "files": [

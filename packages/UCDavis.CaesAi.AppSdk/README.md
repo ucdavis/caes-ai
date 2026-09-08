@@ -2,6 +2,14 @@
 
 Application-side .NET integration for CAES AI. The package contains the stable HTTP contracts, central session client, signed user-context tokens, session assembly, JSON Schema helpers, and the authenticated ASP.NET Core tool callback endpoint.
 
+## Install the beta
+
+Requires .NET 10 and ASP.NET Core.
+
+```bash
+dotnet add package UCDavis.CaesAi.AppSdk --version 0.2.0-beta.0
+```
+
 The package includes the normative version 1 wire schema at
 `contentFiles/any/any/caes-ai/v1/protocol.schema.json`. Its DTOs implement that
 schema. Non-successful central responses are exposed as `CaesAiApiException`,

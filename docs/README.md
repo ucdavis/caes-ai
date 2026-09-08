@@ -7,6 +7,7 @@
 - [Review follow-up](architecture-review-follow-up.md): repairs and explicit review decisions.
 - [Manual test](manual-test.md): the live OpenAI and browser verification path.
 - [GitHub automation](../.github/CI.md): CI steps, test databases and package checks.
+- [Package releases](package-releases.md): npm and NuGet beta distribution and trusted publishing.
 
 Start with the [root README](../README.md) for setup and commands. Each
 [application](../apps/README.md) and [shared package](../packages/README.md) also has

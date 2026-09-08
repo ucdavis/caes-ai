@@ -26,7 +26,7 @@
     "pack:assistant": "mkdir -p artifacts && npm pack --workspace @ucdavis/caes-ai-assistant-react --pack-destination artifacts",
     "pack:dotnet": "mkdir -p artifacts && dotnet pack packages/UCDavis.CaesAi.AppSdk/UCDavis.CaesAi.AppSdk.csproj --configuration Release --output artifacts",
     "pack:protocol": "mkdir -p artifacts && npm pack --workspace @ucdavis/caes-ai-protocol --pack-destination artifacts",
-    "release:publish": "npm run build:packages && changeset publish",
+    "release:publish": "node scripts/publish-npm.mjs",
     "release:version": "changeset version && npm install --package-lock-only",
     "predev": "npm run build:packages && npm run db:up && npm run db:setup",
     "pretest:e2e": "npm run build:packages",

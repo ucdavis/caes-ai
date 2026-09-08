@@ -10,8 +10,13 @@ Run these commands from the repository root:
 
 - `npm run changeset` creates a release note to commit with a package change.
 - `npm run release:version` consumes pending notes, updates package versions and internal dependency ranges, and writes changelogs.
-- `npm run release:publish` builds and publishes package versions that have not yet been published. This is a separate, explicit release operation.
+- `npm run release:publish` publishes the prepared npm artifacts from the GitHub Actions workflow on `main`. It requires beta versions, sets the `beta` tag explicitly, and skips an existing version only when its tarball integrity matches.
 
 CI only builds, tests and packs packages. It does not run either release command.
 The private applications are excluded by `config.json`; NuGet versioning remains in
 the .NET project file. Changesets uses the same npm workspaces as the rest of the repository.
+
+The repository is in Changesets prerelease mode with the `beta` tag. Pending
+changesets produce versions such as `0.2.0-beta.0`; leave this mode enabled during
+the beta. See [package releases](../docs/package-releases.md) for registry setup,
+the first publish, and the manual trusted-publishing workflow.

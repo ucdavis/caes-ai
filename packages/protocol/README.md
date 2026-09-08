@@ -4,6 +4,12 @@ Runtime validators and TypeScript types for the CAES AI application protocol.
 The package owns session, tool callback, presentation, and UI-effect envelopes.
 Applications own each tool's `inputSchema` and `dataSchema`.
 
+## Install the beta
+
+```bash
+npm install @ucdavis/caes-ai-protocol@beta
+```
+
 The current wire version is exported as `currentProtocolVersion`. CAES AI rejects
 requests that use another version.
 
