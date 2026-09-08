@@ -1,8 +1,8 @@
 targetScope = 'subscription'
 
-@description('The subject must match the GitHub test environment OIDC token. This repository currently uses the default non-immutable subject.')
-@allowed(['repo:ucdavis/caes-ai:environment:test'])
-param federatedSubject string = 'repo:ucdavis/caes-ai:environment:test'
+@description('Exact test environment subject emitted by GitHub. This repository uses the default format with immutable owner and repository IDs.')
+@allowed(['repo:ucdavis@573450/caes-ai@1357492545:environment:test'])
+param federatedSubject string = 'repo:ucdavis@573450/caes-ai@1357492545:environment:test'
 
 var guardPassed = subscription().subscriptionId == '105dede4-4731-492e-8c28-5121226319b0' && tenant().tenantId == 'a8046f64-66c0-4f00-9046-c8daf92ff62b'
 
