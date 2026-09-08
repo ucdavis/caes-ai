@@ -13,8 +13,13 @@ Most tests live beside their application or package. This directory contains the
 | [Todo API](../apps/todo-app/api/UCDavis.CaesAi.Todo.Api.IntegrationTests/README.md) | ASP.NET Core test host and in-memory SQLite. |
 | [Browser E2E](e2e/README.md) | Chromium, the complete application stack and live OpenAI. |
 
-`pnpm check` runs the non-E2E suites, builds shared packages and checks types,
+`npm run check` runs the non-E2E suites, builds shared packages and checks types,
 lint, migrations and .NET formatting/builds. Follow the
 [root verification instructions](../README.md#verification) to configure an isolated
 `CAES_AI_TEST_DATABASE_URL`. Tests never provision the Todo demo or infer its database
 URL. CI supplies the test database through its PostgreSQL service.
+
+`npm run test:js` builds the shared packages and runs the four ordinary JavaScript
+suites, including the PostgreSQL tests. `npm run test:dotnet` builds and tests the
+.NET solution. CI runs them as separately named steps. `npm run test:e2e` is the
+explicit opt-in for the live browser/provider suite.

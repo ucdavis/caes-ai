@@ -11,6 +11,6 @@ Applications own their tool argument and business-data schemas inside these enve
 There is no build or service to run here. Contract checks run through the
 [protocol package](../packages/protocol/README.md) and
 [.NET SDK tests](../packages/UCDavis.CaesAi.AppSdk.Tests/README.md), both included in
-`pnpm check`. Update implementations and shared fixtures together when changing a
+`npm run check`. Update implementations and shared fixtures together when changing a
 contract. Protocol versions are explicit; independent deployments must not silently
 reinterpret version 1.

@@ -43,19 +43,34 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: "22"
-          package-manager-cache: false
-      - uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
-        with:
-          cache: true
+          cache: npm
+      - name: Use npm 11.19.1
+        run: npm install --global npm@11.19.1
       - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: "10.0.x"
-      - run: pnpm install --frozen-lockfile
-      - run: dotnet restore apps/todo-app/UCDavis.CaesAi.Todo.slnx
-      - run: pnpm check
-      - run: pnpm build
+      - name: Install JavaScript dependencies
+        run: npm ci
+      - name: Verify dependency tree
+        run: npm run deps:check
+      - name: Restore .NET dependencies
+        run: dotnet restore apps/todo-app/UCDavis.CaesAi.Todo.slnx
+      - name: Build applications and packages
+        run: npm run build
+      - name: Check TypeScript types
+        run: npm run typecheck
+      - name: Check database migrations
+        run: npm run db:check
+      - name: Lint JavaScript and TypeScript
+        run: npm run lint
+      - name: Check .NET formatting
+        run: npm run format:check
+      - name: Test JavaScript packages and PostgreSQL persistence
+        run: npm run test:js
+      - name: Test .NET SDK and Todo API
+        run: npm run test:dotnet
       - name: Verify package creation without publishing
         run: |
-          pnpm pack:protocol
-          pnpm pack:assistant
-          pnpm pack:dotnet
+          npm run pack:protocol
+          npm run pack:assistant
+          npm run pack:dotnet

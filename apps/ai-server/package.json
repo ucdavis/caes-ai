@@ -10,7 +10,7 @@
     "db:bootstrap-todo": "tsx scripts/dev/bootstrap-todo.ts",
     "db:generate": "drizzle-kit generate",
     "dev": "tsx watch src/server.ts",
-    "pretest": "pnpm --filter @ucdavis/caes-ai-protocol build",
+    "pretest": "npm run build --workspace @ucdavis/caes-ai-protocol",
     "start": "node dist/server.js",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json"
@@ -27,7 +27,7 @@
     "@opentelemetry/sdk-node": "^0.222.0",
     "@tanstack/ai": "^0.52.1",
     "@tanstack/ai-openai": "^0.22.3",
-    "@ucdavis/caes-ai-protocol": "workspace:*",
+    "@ucdavis/caes-ai-protocol": "^0.1.0",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
     "dotenv": "^17.2.3",

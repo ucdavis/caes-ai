@@ -15,5 +15,5 @@ From the repository root, after restoring the solution:
 dotnet test apps/todo-app/api/UCDavis.CaesAi.Todo.Api.IntegrationTests --no-restore
 ```
 
-These tests are included in `pnpm check`. The [browser E2E suite](../../../../tests/e2e/README.md)
+These tests are included in `npm run check`. The [browser E2E suite](../../../../tests/e2e/README.md)
 adds the frontend and live provider to the path.

@@ -54,7 +54,7 @@ No locks or quota subsystem were added in this pass.
 
 ## Verification
 
-After the cancellation repair, `pnpm check` passed in an isolated source copy with the root demo-bootstrap
+After the cancellation repair, the alpha verification command passed in an isolated source copy with the root demo-bootstrap
 `pretest` hook removed. All reviewed source files were compared with that copy;
 the check covered package builds and public declaration checks, TypeScript, ESLint,
 migration consistency, .NET formatting and builds, and 209 tests: 78 protocol,

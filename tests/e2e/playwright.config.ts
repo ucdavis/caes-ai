@@ -21,7 +21,7 @@ export default defineConfig({
     },
   ],
   webServer: useExistingStack ? undefined : {
-    command: "pnpm --dir ../.. dev",
+    command: "npm --prefix ../.. run dev",
     // The Vite process is ready before the .NET API on a cold build. Waiting on
     // Kestrel prevents the assistant's one-time session bootstrap from racing it.
     url: "http://127.0.0.1:5180/health",

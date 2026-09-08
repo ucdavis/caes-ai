@@ -9,12 +9,12 @@ operations through their registered callback. They retain user authorization and
 ## Run and build
 
 Run commands from the repository root. Follow the [local setup](../../README.md#native-setup)
-to configure the environment and start PostgreSQL. `pnpm dev` starts this service
+to configure the environment and start PostgreSQL. `npm run dev` starts this service
 together with the Todo example. To run only this service against the configured database:
 
 ```bash
-pnpm --filter @ucdavis/caes-ai-protocol build
-pnpm exec dotenv -e .env -- pnpm --filter @ucdavis/caes-ai-server dev
+npm run build --workspace @ucdavis/caes-ai-protocol
+npm exec -- dotenv -e .env -- npm run dev --workspace @ucdavis/caes-ai-server
 ```
 
 The default local address is `http://localhost:4310`. Startup applies the checked-in
@@ -23,8 +23,8 @@ tests use scripted model providers. The [root configuration table](../../README.
 lists model policy, callback signing and OTEL settings.
 
 ```bash
-pnpm --filter @ucdavis/caes-ai-protocol build
-pnpm --filter @ucdavis/caes-ai-server build
+npm run build --workspace @ucdavis/caes-ai-protocol
+npm run build --workspace @ucdavis/caes-ai-server
 ```
 
 ## HTTP interface
@@ -49,7 +49,7 @@ Prepare the isolated database and export `CAES_AI_TEST_DATABASE_URL` using the
 [verification instructions](../../README.md#verification), then run:
 
 ```bash
-pnpm --filter @ucdavis/caes-ai-server test
+npm run test --workspace @ucdavis/caes-ai-server
 ```
 
 Four tests in [application-registry.database.test.ts](test/application-registry.database.test.ts)
@@ -57,7 +57,7 @@ use real PostgreSQL for registration/key lifecycle, bootstrap collisions, sessio
 reload and operational persistence. The remaining tests use injected stores,
 scripted providers and local callback servers as needed.
 
-The administration CLI uses direct database credentials. Run `pnpm caes-ai app list`
+The administration CLI uses direct database credentials. Run `npm run caes-ai -- app list`
 or follow the [administration guide](../../README.md#application-administration)
 to register applications and rotate keys. `scripts/dev/` contains the separate Todo
 bootstrap; it is not part of normal server startup or test setup.

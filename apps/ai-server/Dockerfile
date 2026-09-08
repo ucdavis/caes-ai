@@ -1,14 +1,17 @@
 FROM node:22-alpine AS build
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@10.11.0 --activate
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml tsconfig.base.json ./
+RUN npm install --global npm@11.19.1
+COPY package.json package-lock.json tsconfig.base.json ./
 COPY apps/ai-server/package.json apps/ai-server/package.json
+COPY apps/todo-app/web/package.json apps/todo-app/web/package.json
 COPY packages/protocol/package.json packages/protocol/package.json
-RUN pnpm install --frozen-lockfile --filter @ucdavis/caes-ai-server... --filter @ucdavis/caes-ai-protocol...
+COPY packages/assistant-react/package.json packages/assistant-react/package.json
+COPY tests/e2e/package.json tests/e2e/package.json
+RUN npm ci --workspace @ucdavis/caes-ai-server --workspace @ucdavis/caes-ai-protocol --include-workspace-root
 COPY apps/ai-server apps/ai-server
 COPY packages/protocol packages/protocol
 COPY contracts contracts
-RUN pnpm --filter @ucdavis/caes-ai-protocol build && pnpm --filter @ucdavis/caes-ai-server build
+RUN npm run build --workspace @ucdavis/caes-ai-protocol --workspace @ucdavis/caes-ai-server
 
 FROM node:22-alpine AS runtime
 ENV NODE_ENV=production
