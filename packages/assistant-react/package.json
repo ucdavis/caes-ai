@@ -1,6 +1,6 @@
 {
   "name": "@ucdavis/caes-ai-assistant-react",
-  "version": "0.2.0-beta.0",
+  "version": "0.2.0-beta.1",
   "description": "Headless React runtime with optional assistant UI for CAES AI applications.",
   "repository": {
     "type": "git",
@@ -35,7 +35,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@ucdavis/caes-ai-protocol": "^0.2.0-beta.0",
+    "@ucdavis/caes-ai-protocol": "^0.2.0-beta.1",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1"
   },

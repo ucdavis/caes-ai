@@ -4,6 +4,7 @@ import { DrizzleQueryError } from "drizzle-orm/errors";
 import { InMemorySessionRepository } from "../src/persistence/session-repository.js";
 import { trace } from "@opentelemetry/api";
 import { tracing } from "@opentelemetry/sdk-node";
+import { NoopOperationalStore } from "../src/persistence/operational-store.js";
 import { OpenAIResponsesProvider } from "../src/providers/model-provider.js";
 
 import {
@@ -152,6 +153,59 @@ describe("session API", () => {
       trace.disable(); await provider.shutdown();
     }
   });
+
+  it.each(["unknown metadata", "conflicting names", "provider failure"] as const)(
+    "records safe diagnostics for %s through the chat API", async (failure) => {
+      const logs: string[] = [];
+      const store = new NoopOperationalStore();
+      const finishRun = vi.spyOn(store, "finishRun");
+      const callback = vi.fn<typeof fetch>();
+      const original = scriptedModelProvider.createAdapter("test-model");
+      const app = buildApp({ config, applicationRegistry, operationalStore: store,
+        fetchImplementation: callback,
+        logger: { stream: new Writable({ write(chunk, _encoding, done) { logs.push(String(chunk)); done(); } }) },
+        modelProvider: { ...scriptedModelProvider, createAdapter: () => ({ ...original,
+          async *chatStream(options) {
+            if (failure === "provider failure") throw new Error("PRIVATE_PROVIDER_MARKER");
+            for await (const event of original.chatStream(options)) {
+              if (failure === "unknown metadata" && event.type === "TOOL_CALL_START") {
+                yield { ...event, metadata: { PRIVATE_KEY_MARKER: "PRIVATE_VALUE_MARKER" } };
+              } else if (failure === "conflicting names" && event.type === "TOOL_CALL_END") {
+                yield { ...event, toolName: "list_todos", toolCallName: "private_name_marker" };
+              } else yield event;
+            }
+          },
+        }) },
+      });
+      apps.push(app);
+      const created = await app.inject({ method: "POST", url: "/v1/sessions",
+        headers: { authorization: `ApiKey ${applicationKey}` }, payload: sessionRequest });
+      const session = created.json();
+      const response = await app.inject({ method: "POST", url: `/v1/sessions/${session.sessionId}/chat`,
+        headers: { authorization: `Bearer ${session.accessToken}`, [caesAiProtocolVersionHeader]: "1" },
+        payload: { protocolVersion: 1, threadId: "diagnostic-thread", runId: "diagnostic-run",
+          messages: [{ id: "message", role: "user", content: "PRIVATE_PROMPT_MARKER" }], tools: [], context: [] },
+      });
+      expect(response.statusCode).toBe(200);
+      const events = response.body.split("\n").filter(line => line.startsWith("data: "))
+        .map(line => chatStreamEventSchema.parse(JSON.parse(line.slice(6))));
+      expect(events).toEqual(expect.arrayContaining([expect.objectContaining({
+        type: "RUN_ERROR", code: "provider_error", message: "I couldn't finish that response. Please try again.",
+      })]));
+      expect(callback).not.toHaveBeenCalled();
+      const errorCode = failure === "provider failure" ? "provider_error" : "stream_protocol_error";
+      expect(finishRun).toHaveBeenCalledWith(expect.objectContaining({ outcome: "error", errorCode }));
+      const entries = logs.join("").trim().split("\n").map(line => JSON.parse(line));
+      expect(entries).toEqual(expect.arrayContaining([expect.objectContaining({ providerCode: errorCode,
+        ...(failure === "provider failure" ? {} : {
+          eventType: failure === "unknown metadata" ? "TOOL_CALL_START" : "TOOL_CALL_END",
+          fieldPaths: failure === "unknown metadata" ? ["metadata.<unknown>"] : ["toolName", "toolCallName"],
+        }),
+      })]));
+      expect(response.body + logs.join("")).not.toMatch(/PRIVATE_|private_name_marker|signed-context-token/);
+      expect(logs.join("")).not.toContain(session.accessToken);
+    },
+  );
 
   it.each([
     ["{", 400],
@@ -378,12 +432,31 @@ describe("session API", () => {
     });
   });
 
-  it("streams a dynamically registered server tool through the application gateway", async () => {
+  it.each([false, true])("streams a dynamically registered server tool through the application gateway (Responses metadata: %s)", async (includeResponsesMetadata) => {
     const gatewayRequests: unknown[] = [];
+    const providerMessages: unknown[] = [];
+    const adapter = scriptedModelProvider.createAdapter("test-model");
     const app = buildApp({
       config,
       applicationRegistry,
-      modelProvider: scriptedModelProvider,
+      modelProvider: {
+        ...scriptedModelProvider,
+        createAdapter: () => ({
+          ...adapter,
+          async *chatStream(options) {
+            providerMessages.push(structuredClone(options.messages));
+            for await (const event of adapter.chatStream(options)) {
+              if (includeResponsesMetadata && event.type === "TOOL_CALL_START") {
+                yield { ...event, metadata: { ...event.metadata, itemId: "fc_todo_1" } };
+              } else if (includeResponsesMetadata && event.type === "TOOL_CALL_END") {
+                yield { ...event, toolCallName: "list_todos", toolName: "list_todos" };
+              } else {
+                yield event;
+              }
+            }
+          },
+        }),
+      },
       fetchImplementation: async (_input, init) => {
         gatewayRequests.push(JSON.parse(String(init?.body)));
         return Response.json({
@@ -427,7 +500,9 @@ describe("session API", () => {
     expect(response.statusCode).toBe(200);
     expect(response.headers["content-type"]).toContain("text/event-stream");
     expect(response.headers[caesAiProtocolVersionHeader]).toBe("1");
+    expect(response.body).not.toContain("RUN_ERROR");
     expect(response.body).toContain("TOOL_CALL_RESULT");
+    expect(response.body).not.toContain("fc_todo_1");
     const assistantText = response.body
       .trim()
       .split("\n\n")
@@ -440,6 +515,7 @@ describe("session API", () => {
       .join("");
     expect(assistantText).toBe("I found 1 matching Todos.");
     for (const block of response.body.trim().split("\n\n")) {
+      expect(chatStreamEventSchema.safeParse(JSON.parse(block.replace(/^data: /, ""))).success).toBe(true);
       expect(JSON.parse(block.replace(/^data: /, ""))).toMatchObject({
         metadata: {
           caesAi: { protocolVersion: currentProtocolVersion },
@@ -454,6 +530,16 @@ describe("session API", () => {
       contextToken: "signed-context-token",
       arguments: { status: "all", resultView: "list" },
     });
+    if (includeResponsesMetadata) {
+      expect(providerMessages.at(-1)).toEqual(expect.arrayContaining([
+        expect.objectContaining({
+          role: "assistant",
+          toolCalls: expect.arrayContaining([
+            expect.objectContaining({ metadata: expect.objectContaining({ itemId: "fc_todo_1" }) }),
+          ]),
+        }),
+      ]));
+    }
   });
 
   it("streams a versioned public error when the model provider throws", async () => {

@@ -18,6 +18,26 @@ The central response has `protocolVersion`, `sessionId`, `accessToken`, `expires
 
 `POST /v1/sessions/{sessionId}/chat` uses `Authorization: Bearer <session token>`. The request sends `X-CAES-AI-Protocol-Version: 1` and the strict CAES AI chat envelope. CAES AI accepts only `reasoningEffort` as a forwarded property. The response repeats the version header and is `text/event-stream`; every JSON event includes `metadata.caesAi.protocolVersion: 1` and a permitted version 1 event name.
 
+The server removes Responses' internal `metadata.itemId` from outgoing
+`TOOL_CALL_START` events and matching runtime tool-name aliases from
+`TOOL_CALL_END` before wire validation. The original event retains the ID
+for the provider's tool loop. This normalization leaves the browser's strict v1
+metadata contract unchanged. This translation lives at the server's outgoing
+stream boundary; the shared protocol parser remains strict.
+
+The React client validates each incoming event. The React provider then removes
+`metadata.caesAi` before handing it to the chat runtime. This transport version tag must not enter
+message history: it is not part of the v1 message schema and causes subsequent
+turns to be rejected. Existing React clients need the corresponding package patch
+for that history fix.
+
+Server-side stream validation failures are recorded internally as
+`stream_protocol_error`, with the event type and bounded, sanitized field paths.
+Provider failures remain `provider_error`. Browser errors retain their generic
+v1 shape; diagnostics exclude event contents, arbitrary keys, and credentials.
+Regression coverage exercises server tools, approval and rejection, and later
+history turns through the React client and HTTP API.
+
 The React transport removes its internal transport library's legacy duplicate `data` field, adds the request version, validates the response header and content type, and validates each event. It renews once on an HTTP 401 using the host application's session factory. It does not send a central session token to the Todo API.
 
 ## Tool callback

@@ -1,6 +1,7 @@
 import {
   toolDefinition,
   type AnyClientTool,
+  type StreamChunk,
 } from "@tanstack/ai";
 import { useChat, type ConnectConnectionAdapter } from "@tanstack/ai-react";
 import {
@@ -196,8 +197,21 @@ export function AssistantProvider({
     () => buildTools(session, clientTools),
     [session, clientTools],
   );
+  const connection = useMemo<ConnectConnectionAdapter>(() => ({
+    async *connect(messages, data, abortSignal, runContext) {
+      for await (const event of assistantClient.connection.connect(
+        messages, data, abortSignal, runContext ? { ...runContext } : undefined,
+      )) {
+        // Keep the validated wire event public, but omit its transport version
+        // from TanStack's replayable message and tool-call metadata.
+        const metadata: Record<string, unknown> = { ...event.metadata };
+        delete metadata.caesAi;
+        yield { ...event, metadata } as StreamChunk;
+      }
+    },
+  }), [assistantClient]);
   const chat = useChat({
-    connection: assistantClient.connection as unknown as ConnectConnectionAdapter,
+    connection,
     threadId,
     tools,
   });

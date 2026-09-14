@@ -7,7 +7,7 @@
     <IsPackable>true</IsPackable>
     <PackageId>UCDavis.CaesAi.AppSdk</PackageId>
     <VersionPrefix>0.2.0</VersionPrefix>
-    <VersionSuffix>beta.0</VersionSuffix>
+    <VersionSuffix>beta.1</VersionSuffix>
     <Description>Application-side contracts and ASP.NET Core integration for CAES AI.</Description>
     <PackageTags>caes-ai;ai;assistant;aspnetcore</PackageTags>
     <RepositoryUrl>https://github.com/ucdavis/caes-ai</RepositoryUrl>
