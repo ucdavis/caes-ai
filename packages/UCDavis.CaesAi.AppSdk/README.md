@@ -6,9 +6,9 @@ Application-side .NET integration for CAES AI. The package contains the stable H
 
 Requires .NET 10 and ASP.NET Core.
 
-```bash
-dotnet add package UCDavis.CaesAi.AppSdk --version 0.2.0-beta.0
-```
+Use the NuGet installation command in the
+[package release guide](https://github.com/ucdavis/caes-ai/blob/main/docs/package-releases.md)
+for the current beta version.
 
 The package includes the normative version 1 wire schema at
 `contentFiles/any/any/caes-ai/v1/protocol.schema.json`. Its DTOs implement that

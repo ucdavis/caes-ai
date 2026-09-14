@@ -243,10 +243,9 @@ npm run release:version
 
 Versioning and publishing remain separate, explicit operations. `@tanstack/ai`, `@tanstack/ai-react`, React, and React DOM are peers of the React package rather than bundled framework copies.
 
-The first public package release is prepared as `0.2.0-beta.0`, with npm's `beta`
-dist-tag and a NuGet prerelease version. See [package releases](docs/package-releases.md)
-for installation, registry setup and the manual publishing workflow. Publishing
-these libraries does not deploy the central server.
+See [package releases](docs/package-releases.md) for the current beta version,
+installation, registry setup and the manual publishing workflow. Publishing these
+libraries does not deploy the central server.
 
 ## Azure test deployment
 
