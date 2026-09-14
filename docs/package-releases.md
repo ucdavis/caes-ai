@@ -1,13 +1,13 @@
 # Package releases
 
 CAES AI distributes two public npm packages and one public NuGet package. The
-first release is prepared as `0.2.0-beta.0`. Server deployment is separate.
+current release is prepared as `0.2.0-beta.1`. Server deployment is separate.
 
 | Registry | Package | Beta installation |
 | --- | --- | --- |
 | npmjs.org | `@ucdavis/caes-ai-protocol` | `npm install @ucdavis/caes-ai-protocol@beta` |
 | npmjs.org | `@ucdavis/caes-ai-assistant-react` | `npm install @ucdavis/caes-ai-assistant-react@beta` |
-| NuGet.org | `UCDavis.CaesAi.AppSdk` | `dotnet add package UCDavis.CaesAi.AppSdk --version 0.2.0-beta.0` |
+| NuGet.org | `UCDavis.CaesAi.AppSdk` | `dotnet add package UCDavis.CaesAi.AppSdk --version 0.2.0-beta.1` |
 
 The .NET SDK requires .NET 10. The React package declares React, React DOM and the
 compatible TanStack AI packages as peers. The protocol package is also available

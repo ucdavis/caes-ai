@@ -12,7 +12,6 @@ import {
 import {
   caesAiProtocolVersionHeader,
   chatRequestEnvelopeSchema,
-  parseChatRuntimeEvent,
   currentProtocolVersion,
   reasoningEffortSchema,
   type CaesAiErrorResponse,
@@ -20,6 +19,7 @@ import {
   type ChatRequestEnvelope,
 } from "@ucdavis/caes-ai-protocol";
 import type { FastifyInstance } from "fastify";
+import { ChatStreamProtocolError, toChatWireEvent } from "./wire-events.js";
 
 import type { ApplicationRegistry } from "../applications/registry.js";
 import type { ServerConfig } from "../config.js";
@@ -72,8 +72,8 @@ async function* versionChatStream(
 }
 
 async function* validateChatStream(stream: AsyncIterable<StreamChunk>): AsyncIterable<StreamChunk> {
-  for await (const chunk of versionChatStream(stream)) {
-    yield parseChatRuntimeEvent(chunk) as StreamChunk;
+  for await (const chunk of stream) {
+    yield toChatWireEvent(chunk) as StreamChunk;
   }
 }
 
@@ -179,10 +179,10 @@ async function* observe(
       }
       yield chunk;
     }
-  } catch {
+  } catch (error) {
     if (details.signal.aborted) return;
     outcome = "error";
-    errorCode = "provider_error";
+    errorCode = error instanceof ChatStreamProtocolError ? "stream_protocol_error" : "provider_error";
     details.app.log.warn(
       {
         applicationId: details.applicationId,
@@ -192,8 +192,12 @@ async function* observe(
         provider: details.provider,
         transport: details.transport,
         providerCode: errorCode,
+        ...(error instanceof ChatStreamProtocolError ? {
+          eventType: error.eventType,
+          fieldPaths: error.fieldPaths,
+        } : {}),
       },
-      "Chat provider stream failed",
+      error instanceof ChatStreamProtocolError ? "Chat stream contract failed" : "Chat provider stream failed",
     );
     yield {
       type: EventType.RUN_ERROR,

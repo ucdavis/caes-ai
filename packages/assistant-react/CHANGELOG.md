@@ -1,5 +1,15 @@
 # @ucdavis/caes-ai-assistant-react
 
+## 0.2.0-beta.1
+
+### Patch Changes
+
+- Remove transport version metadata after validating incoming chat events so it is not stored in message history and rejected on subsequent turns.
+
+  Keep protocol package versions aligned for the coordinated beta release; the v1 wire contract is unchanged.
+- Updated dependencies
+  - @ucdavis/caes-ai-protocol@0.2.0-beta.1
+
 ## 0.2.0-beta.0
 
 ### Minor Changes
