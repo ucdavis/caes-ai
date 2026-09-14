@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { createLocalJWKSet, jwtVerify } from "jose";
+import { createLocalJWKSet, jwtVerify, type JSONWebKeySet } from "jose";
 import { describe, expect, it, vi } from "vitest";
 import { chatRequestEnvelopeSchema, chatStreamEventSchema } from "@ucdavis/caes-ai-protocol";
 import { buildApp, type ServerConfig } from "../../../apps/ai-server/src/app.js";
@@ -73,7 +73,7 @@ describe("server tool continuations through the React client and HTTP API", () =
       const request = JSON.parse(body);
       const authorization = new Headers(init?.headers).get("authorization");
       expect(authorization?.startsWith("Bearer ")).toBe(true);
-      const jwks = (await app.inject({ method: "GET", url: "/.well-known/jwks.json" })).json();
+      const jwks = (await app.inject({ method: "GET", url: "/.well-known/jwks.json" })).json<JSONWebKeySet>();
       const { payload } = await jwtVerify(authorization!.slice(7), createLocalJWKSet(jwks), {
         algorithms: ["ES256"], issuer: config.callbackIssuer,
         audience: "caes-ai-app:example", typ: "caes-ai-tool-callback+jwt",
