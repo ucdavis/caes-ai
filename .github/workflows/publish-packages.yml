@@ -12,7 +12,7 @@ on:
       version:
         description: Expected beta version in the checked-in package manifests
         type: string
-        default: 0.2.0-beta.0
+        default: 0.2.0-beta.1
         required: true
       npm_auth:
         description: Use bootstrap only for the first npm upload before trusted publishing is configured
