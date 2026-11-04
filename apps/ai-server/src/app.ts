@@ -42,6 +42,7 @@ export interface BuildAppOptions {
   sessionRepository?: SessionRepository;
   operationalStore?: OperationalStore;
   logger?: FastifyServerOptions["logger"];
+  githubMcpUrl?: string;
 }
 
 class OriginPolicyError extends Error {
@@ -80,6 +81,7 @@ export function buildApp({
   sessionRepository = new InMemorySessionRepository(),
   operationalStore = new NoopOperationalStore(),
   logger,
+  githubMcpUrl,
 }: BuildAppOptions): FastifyInstance {
   const sessions = new SessionStore(
     config,
@@ -274,6 +276,7 @@ export function buildApp({
     modelProvider,
     operationalStore,
     fetchImplementation,
+    githubMcpUrl,
   );
 
   app.decorate("caesAiSessions", sessions);

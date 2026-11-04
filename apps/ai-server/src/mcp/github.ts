@@ -116,7 +116,7 @@ function classifyFailure(error: unknown, signal: AbortSignal): GitHubToolError {
       "The GitHub response is too large to read. Try a narrower search or a smaller file.",
     );
   }
-  if (error instanceof McpError && error.code === ErrorCode.RequestTimeout) {
+  if (error instanceof McpError && error.code === Number(ErrorCode.RequestTimeout)) {
     return new GitHubToolError("tool_timeout", "GitHub did not respond in time.");
   }
   return new GitHubToolError(
