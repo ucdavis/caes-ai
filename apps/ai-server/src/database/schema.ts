@@ -90,6 +90,7 @@ export const assistantSessions = pgTable(
     applicationSnapshot: jsonb("application_snapshot").notNull(),
     toolManifest: jsonb("tool_manifest").notNull(),
     toolManifestHash: varchar("tool_manifest_hash", { length: 64 }).notNull(),
+    mcpServers: jsonb("mcp_servers").notNull().default([]),
     modelPolicy: jsonb("model_policy").notNull(),
     allowPerTurnOverride: boolean("allow_per_turn_override").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "date" }).notNull(),

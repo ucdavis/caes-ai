@@ -260,6 +260,70 @@ describe("session API", () => {
     expect(response.statusCode).toBe(status);
   });
 
+  it("rejects GitHub MCP when the server has no token", async () => {
+    const app = buildApp({ config, applicationRegistry });
+    apps.push(app);
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/sessions",
+      headers: { authorization: `ApiKey ${applicationKey}` },
+      payload: { ...sessionRequest, mcpServers: ["github"] },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("mcp_server_not_configured");
+  });
+
+  it("rejects an application tool that collides with a GitHub tool", async () => {
+    const app = buildApp({ config: { ...config, githubMcpToken: "synthetic-github-token" }, applicationRegistry });
+    apps.push(app);
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/sessions",
+      headers: { authorization: `ApiKey ${applicationKey}` },
+      payload: {
+        ...sessionRequest,
+        mcpServers: ["github"],
+        tools: [{ ...sessionRequest.tools[0], name: "github_search_code" }],
+      },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error.code).toBe("invalid_tool_manifest");
+  });
+
+  it("allows that tool name when the session did not opt in", async () => {
+    const app = buildApp({ config, applicationRegistry });
+    apps.push(app);
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/sessions",
+      headers: { authorization: `ApiKey ${applicationKey}` },
+      payload: { ...sessionRequest, tools: [{ ...sessionRequest.tools[0], name: "github_search_code" }] },
+    });
+    expect(response.statusCode).toBe(201);
+  });
+
+  it.each([
+    [{ mcpServers: ["github"] }, ["github"]],
+    [{}, []],
+  ])("persists the MCP opt-in %j", async (fields, expected) => {
+    const repository = new InMemorySessionRepository();
+    const app = buildApp({
+      config: { ...config, githubMcpToken: "synthetic-github-token" },
+      applicationRegistry,
+      sessionRepository: repository,
+    });
+    apps.push(app);
+    const response = await app.inject({
+      method: "POST",
+      url: "/v1/sessions",
+      headers: { authorization: `ApiKey ${applicationKey}` },
+      payload: { ...sessionRequest, ...fields },
+    });
+    expect(response.statusCode).toBe(201);
+    expect((await repository.find(response.json().sessionId))?.mcpServers).toEqual(expected);
+    expect(JSON.stringify(response.json())).not.toContain("synthetic-github-token");
+  });
+
   it("versions denied origins and rejects invalid session IDs before database lookup", async () => {
     const repository = new InMemorySessionRepository();
     const lookup = vi.spyOn(repository, "find").mockRejectedValue(new Error("database unavailable"));
