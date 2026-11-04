@@ -143,7 +143,7 @@ export function toolCallingProvider(toolName: string, args: unknown): ToolCallin
     async *chatStream(options) {
       const runId = options.runId ?? "run";
       const threadId = options.threadId ?? "thread";
-      toolNames.push((options.tools ?? []).map((tool) => tool.name));
+      toolNames.push((options.tools ?? []).map((tool): string => tool.name));
       yield { type: EventType.RUN_STARTED, runId, threadId, model: options.model, timestamp: Date.now() };
       const results = options.messages.filter((message) => message.role === "tool");
       if (results.length) {

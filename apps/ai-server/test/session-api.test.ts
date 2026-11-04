@@ -320,7 +320,8 @@ describe("session API", () => {
       payload: { ...sessionRequest, ...fields },
     });
     expect(response.statusCode).toBe(201);
-    expect((await repository.find(response.json().sessionId))?.mcpServers).toEqual(expected);
+    const { sessionId } = response.json<{ sessionId: string }>();
+    expect((await repository.find(sessionId))?.mcpServers).toEqual(expected);
     expect(JSON.stringify(response.json())).not.toContain("synthetic-github-token");
   });
 
