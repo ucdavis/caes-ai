@@ -57,7 +57,9 @@ public sealed record CreateCaesAiSessionRequest(
     string ContextToken,
     string Instructions,
     ModelPolicyRequest ModelPolicy,
-    IReadOnlyList<ApplicationToolManifest> Tools);
+    IReadOnlyList<ApplicationToolManifest> Tools,
+    [property: JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    IReadOnlyList<string>? McpServers = null);
 
 public sealed record EffectiveModelPolicy(
     string Model,
@@ -89,7 +91,8 @@ public sealed record CaesAiSessionDefinition(
     string UserReference,
     string Instructions,
     IReadOnlyList<ApplicationToolManifest> Tools,
-    ModelPolicyRequest? ModelPolicy = null);
+    ModelPolicyRequest? ModelPolicy = null,
+    IReadOnlyList<string>? McpServers = null);
 
 public sealed record ToolExecutionRequest(
     int ProtocolVersion,
