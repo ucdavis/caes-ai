@@ -98,7 +98,7 @@ export function buildApp({
               : {};
           },
         }),
-    bodyLimit: 256 * 1_024,
+    bodyLimit: 2 * 1_024 * 1_024,
     requestIdHeader: "x-caes-ai-request-id",
   });
   app.setErrorHandler((error, request, reply) => {

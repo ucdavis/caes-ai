@@ -209,7 +209,7 @@ describe("session API", () => {
 
   it.each([
     ["{", 400],
-    [JSON.stringify({ text: "x".repeat(300_000) }), 413],
+    [JSON.stringify({ text: "x".repeat(2_100_000) }), 413],
   ])("versions parser failures", async (payload, status) => {
     const app = buildApp({ config, applicationRegistry });
     apps.push(app);
@@ -217,6 +217,47 @@ describe("session API", () => {
     expect(response.statusCode).toBe(status);
     expect(response.json().protocolVersion).toBe(1);
     expect(response.headers[caesAiProtocolVersionHeader]).toBe("1");
+  });
+
+  // Every turn resends the whole conversation, so this bounds the conversation rather than one message.
+  it.each([
+    ["accepts", 2_097_152, 200],
+    ["rejects", 2_097_153, 413],
+  ])("%s a chat request body of %i bytes", async (_outcome, bytes, status) => {
+    const app = buildApp({ config, applicationRegistry, modelProvider: scriptedModelProvider });
+    apps.push(app);
+    const created = await app.inject({
+      method: "POST",
+      url: "/v1/sessions",
+      headers: { authorization: `ApiKey ${applicationKey}` },
+      payload: sessionRequest,
+    });
+    const session = created.json<{ sessionId: string; accessToken: string }>();
+    const chatBody = (content: string) => JSON.stringify({
+      protocolVersion: currentProtocolVersion,
+      threadId: "thread-large",
+      runId: "run-large",
+      messages: [{ id: "user-large", role: "user", content }],
+      tools: [],
+      context: [],
+      forwardedProps: {},
+      state: {},
+    });
+    const payload = chatBody("x".repeat(bytes - Buffer.byteLength(chatBody(""))));
+
+    const response = await app.inject({
+      method: "POST",
+      url: `/v1/sessions/${session.sessionId}/chat`,
+      headers: {
+        authorization: `Bearer ${session.accessToken}`,
+        "content-type": "application/json",
+        [caesAiProtocolVersionHeader]: String(currentProtocolVersion),
+      },
+      payload,
+    });
+
+    expect(Buffer.byteLength(payload)).toBe(bytes);
+    expect(response.statusCode).toBe(status);
   });
 
   it("versions denied origins and rejects invalid session IDs before database lookup", async () => {
