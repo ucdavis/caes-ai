@@ -18,6 +18,9 @@ param allowedModels string = defaultModel
 param otelEndpoint string = ''
 @secure()
 param otelHeaders string = ''
+@secure()
+@description('Fine-grained token with public repository read access. Empty leaves GitHub MCP off.')
+param githubMcpToken string = ''
 
 // This template deliberately cannot provision production or modify the shared plan.
 var guardPassed = subscription().subscriptionId == '105dede4-4731-492e-8c28-5121226319b0' && tenant().tenantId == 'a8046f64-66c0-4f00-9046-c8daf92ff62b' && resourceGroup().name == 'rg-caes-ai-test'
@@ -64,6 +67,7 @@ resource webApp 'Microsoft.Web/sites@2024-11-01' = if (guardPassed) {
         { name: 'CAES_AI_CALLBACK_ISSUER', value: 'https://${webAppName}.azurewebsites.net' }
         { name: 'CAES_AI_CALLBACK_SIGNING_KEYS_JSON', value: callbackSigningKeysJson }
         { name: 'OPENAI_API_KEY', value: openAiApiKey }
+        { name: 'CAES_AI_GITHUB_MCP_TOKEN', value: githubMcpToken }
         { name: 'OPENAI_DEFAULT_MODEL', value: defaultModel }
         { name: 'OPENAI_ALLOWED_MODELS', value: allowedModels }
         { name: 'DATABASE_URL', value: databaseUrl }

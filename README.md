@@ -109,6 +109,7 @@ Compose supplies development-only fallback application credentials. It does not 
 | `CAES_AI_SESSION_TTL_MS` / `CAES_AI_SESSION_SWEEP_INTERVAL_MS` | central | Session lifetime and expired-session cleanup interval |
 | `CAES_AI_MAX_ACTIVE_SESSIONS` / `CAES_AI_MAX_SESSIONS_PER_APPLICATION` | central | Global and per-application active-session limits backed by PostgreSQL |
 | `CAES_AI_PROVIDER_RETRY_ATTEMPTS` / `CAES_AI_PROVIDER_RETRY_BASE_DELAY_MS` | central | Bounded pre-output retry count and exponential-backoff base |
+| `CAES_AI_GITHUB_MCP_TOKEN` | central | Optional read-only GitHub token. Unset leaves GitHub MCP off, and a session that requests it fails with `mcp_server_not_configured` |
 | `CAES_AI_OTEL_ENABLED` | central | Explicitly enables OTLP trace and metric export; defaults to `false` |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | central | Standard OTLP base endpoint required when export is enabled; separate trace and metric endpoints are also supported |
 | `OTEL_SERVICE_NAME` | central | Exported service name; defaults to `caes-ai` |

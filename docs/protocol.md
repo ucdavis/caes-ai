@@ -8,6 +8,8 @@ The normative application-facing specification is `contracts/v1/README.md` plus 
 
 Each tool declares a lowercase name, bounded description, `server | client` execution, `read | write | ui` risk, approval flag, an object `inputSchema`, an object `dataSchema`, and an optional presentation kind. The application schemas describe tool arguments and business data only. CAES AI composes the server-tool output schema from `dataSchema` plus its shared `display` and `uiEffects` envelope. A write tool must require approval; a client tool cannot be a write. Descriptors are strict, so an attempted callback URL or other unrecognized property fails validation.
 
+The optional `mcpServers` array opts the session into central MCP tools. Its only allowed value is `github`, and values must be unique. An application cannot supply a URL or credential. If the central service has no token configured for a requested server, session creation fails with `mcp_server_not_configured`. A GitHub tool name can collide with an application tool (`github_search_code`, `github_get_file_contents`), which fails with `invalid_tool_manifest`. MCP tools are not listed in the session response, and their schemas are read at chat time rather than frozen with the session. Deploy order matters: CAES AI first, then the SDK, then applications, because an older CAES AI rejects the field.
+
 The serialized manifest is limited to 64 KiB by `SessionStore`; each central HTTP body and tool response is separately bounded. Schemas compile under strict Ajv. The server stores a deep-frozen clone and returns its canonical SHA-256 hash.
 
 ## Browser session response

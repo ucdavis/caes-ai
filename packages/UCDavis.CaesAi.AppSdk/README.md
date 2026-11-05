@@ -51,6 +51,13 @@ app.MapPost("/api/assistant/session", async (
 empty value means `default`. CAES AI resolves named profiles centrally and still
 checks every resolved model against both central and application allowlists.
 
+To let the assistant read public GitHub repositories, pass
+`McpServers: ["github"]` to `CaesAiSessionDefinition`. CAES AI holds the GitHub
+token, so the application supplies no URL or credential. The CAES AI server must
+have GitHub configured, or session creation fails with
+`mcp_server_not_configured`. Point the model at the right repository in your
+instructions. When the value is null or empty the SDK omits the field.
+
 ## Map the callback
 
 ```csharp

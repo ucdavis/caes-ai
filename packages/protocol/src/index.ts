@@ -66,6 +66,10 @@ export const applicationToolManifestSchema = z
 
 export type ApplicationToolManifest = z.infer<typeof applicationToolManifestSchema>;
 
+export const mcpServerNames = ["github"] as const;
+export const mcpServerNameSchema = z.enum(mcpServerNames);
+export type McpServerName = z.infer<typeof mcpServerNameSchema>;
+
 export const modelPolicyRequestSchema = z.object({
   requestedModel: z.string().regex(/\S/).min(1).nullable(),
   defaultReasoningEffort: reasoningEffortSchema,
@@ -83,9 +87,17 @@ export const sessionCreationRequestSchema = z
     instructions: z.string().regex(/\S/).min(1).max(16_384),
     modelPolicy: modelPolicyRequestSchema,
     tools: z.array(applicationToolManifestSchema).max(32),
+    mcpServers: z.array(mcpServerNameSchema).optional(),
   })
   .strict()
   .superRefine((request, context) => {
+    if (new Set(request.mcpServers).size !== (request.mcpServers?.length ?? 0)) {
+      context.addIssue({
+        code: "custom",
+        message: "MCP server names must be unique.",
+        path: ["mcpServers"],
+      });
+    }
     const names = new Set<string>();
     for (const [index, tool] of request.tools.entries()) {
       if (names.has(tool.name)) {

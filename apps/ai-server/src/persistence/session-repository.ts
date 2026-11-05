@@ -3,6 +3,7 @@ import { and, count, eq, gt } from "drizzle-orm";
 import type {
   ApplicationToolManifest,
   EffectiveModelPolicy,
+  McpServerName,
 } from "@ucdavis/caes-ai-protocol";
 
 import type { RegisteredApplication } from "../applications/registry.js";
@@ -18,6 +19,7 @@ export interface StoredSession {
   instructions: string;
   tools: ApplicationToolManifest[];
   toolManifestHash: string;
+  mcpServers: McpServerName[];
   modelPolicy: EffectiveModelPolicy;
   allowPerTurnOverride: boolean;
   createdAt: Date;
@@ -72,6 +74,7 @@ export class PostgresSessionRepository implements SessionRepository {
       applicationSnapshot: session.application,
       toolManifest: session.tools,
       toolManifestHash: session.toolManifestHash,
+      mcpServers: session.mcpServers,
       modelPolicy: session.modelPolicy,
       allowPerTurnOverride: session.allowPerTurnOverride,
       createdAt: session.createdAt,
@@ -95,6 +98,7 @@ export class PostgresSessionRepository implements SessionRepository {
       instructions: row.instructions,
       tools: row.toolManifest as ApplicationToolManifest[],
       toolManifestHash: row.toolManifestHash,
+      mcpServers: row.mcpServers as McpServerName[],
       modelPolicy: row.modelPolicy as EffectiveModelPolicy,
       allowPerTurnOverride: row.allowPerTurnOverride,
       createdAt: row.createdAt,

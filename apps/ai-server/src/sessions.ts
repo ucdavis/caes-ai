@@ -8,6 +8,7 @@ import {
 import type {
   ApplicationToolManifest,
   EffectiveModelPolicy,
+  McpServerName,
   ReasoningEffort,
   SessionCreationRequest,
 } from "@ucdavis/caes-ai-protocol";
@@ -15,6 +16,7 @@ import { compileToolSchema } from "@ucdavis/caes-ai-protocol";
 
 import type { RegisteredApplication } from "./applications/registry.js";
 import type { ServerConfig } from "./config.js";
+import { githubToolNames } from "./mcp/github.js";
 import type { ModelProvider } from "./providers/model-provider.js";
 import {
   InMemorySessionRepository,
@@ -47,6 +49,7 @@ export interface SessionRecord {
   instructions: string;
   tools: CompiledTool[];
   toolManifestHash: string;
+  mcpServers: McpServerName[];
   modelPolicy: EffectiveModelPolicy;
   allowPerTurnOverride: boolean;
   createdAt: Date;
@@ -135,6 +138,23 @@ export class SessionStore {
       );
     }
 
+    const mcpServers = request.mcpServers ?? [];
+    if (mcpServers.includes("github")) {
+      if (!this.config.githubMcpToken) {
+        throw new SessionPolicyError(
+          "mcp_server_not_configured",
+          "The GitHub MCP server is not configured.",
+        );
+      }
+      const collision = request.tools.find((tool) => githubToolNames.includes(tool.name));
+      if (collision) {
+        throw new SessionPolicyError(
+          "invalid_tool_manifest",
+          `The tool name ${collision.name} is reserved for GitHub MCP tools.`,
+        );
+      }
+    }
+
     const modelPolicy = this.#resolveModelPolicy(application, request);
     const tools = this.#compileTools(immutableManifests);
 
@@ -152,6 +172,7 @@ export class SessionStore {
       instructions: request.instructions,
       tools: immutableManifests,
       toolManifestHash: hashManifest(immutableManifests),
+      mcpServers,
       modelPolicy,
       allowPerTurnOverride: request.modelPolicy.allowPerTurnOverride,
       createdAt,
@@ -289,6 +310,7 @@ export class SessionPolicyError extends Error {
   constructor(
     readonly code:
       | "invalid_tool_manifest"
+      | "mcp_server_not_configured"
       | "model_not_allowed"
       | "reasoning_effort_not_allowed"
       | "session_limit_reached",

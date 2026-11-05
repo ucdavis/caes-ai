@@ -128,6 +128,44 @@ export const scriptedModelProvider: ModelProvider = {
   middleware: () => [],
 };
 
+export interface ToolCallingProvider {
+  provider: ModelProvider;
+  toolNames: string[][];
+  toolResults: unknown[];
+}
+
+/** Calls one named tool, then answers, recording what each model turn received. */
+export function toolCallingProvider(toolName: string, args: unknown): ToolCallingProvider {
+  const toolNames: string[][] = [];
+  const toolResults: unknown[] = [];
+  const toolAdapter: AnyTextAdapter = {
+    ...adapter,
+    async *chatStream(options) {
+      const runId = options.runId ?? "run";
+      const threadId = options.threadId ?? "thread";
+      toolNames.push((options.tools ?? []).map((tool): string => tool.name));
+      yield { type: EventType.RUN_STARTED, runId, threadId, model: options.model, timestamp: Date.now() };
+      const results = options.messages.filter((message) => message.role === "tool");
+      if (results.length) {
+        toolResults.push(...results.map((message) => message.content));
+        yield { type: EventType.RUN_FINISHED, runId, threadId, finishReason: "stop", model: options.model, timestamp: Date.now() };
+        return;
+      }
+      const toolCallId = `call-${randomUUID()}`;
+      const delta = JSON.stringify(args);
+      yield { type: EventType.TOOL_CALL_START, toolCallId, toolCallName: toolName, parentMessageId: "message-tool" };
+      yield { type: EventType.TOOL_CALL_ARGS, toolCallId, delta };
+      yield { type: EventType.TOOL_CALL_END, toolCallId, input: args };
+      yield { type: EventType.RUN_FINISHED, runId, threadId, finishReason: "tool_calls", model: options.model, timestamp: Date.now() };
+    },
+  };
+  return {
+    provider: { ...scriptedModelProvider, createAdapter: () => toolAdapter },
+    toolNames,
+    toolResults,
+  };
+}
+
 export const throwingModelProvider: ModelProvider = {
   ...scriptedModelProvider,
   createAdapter: () => throwingAdapter,
