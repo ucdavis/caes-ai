@@ -51,6 +51,14 @@ The SDK supplies a stable request identity derived from protocol version, sessio
 
 Read tools execute automatically. Write descriptors are rejected at session creation unless `needsApproval` is true. TanStack's approval interrupt occurs before the gateway executor runs.
 
+## GitHub MCP
+
+An application can opt a session into GitHub's code reading tools with `mcpServers: ["github"]`. CAES AI is the MCP client, so the model provider never calls GitHub. The URL (`https://api.githubcopilot.com/mcp/x/repos/readonly`) and the allowed tools (`search_code`, `get_file_contents`) are constants in `apps/ai-server/src/mcp/github.ts`, and the only setting is `CAES_AI_GITHUB_MCP_TOKEN`. Sessions store the requested names, never a URL, token or tool schema, so MCP does not weaken the rule that only central settings and the registry hold destinations.
+
+Each chat run connects, lists tools, keeps only the allowlist, and exposes each as a read-only server tool named `github_<tool>`. The token is sent only to that URL, and redirects are refused so it cannot be forwarded. Browsers and applications never hold it. Calls use the existing tool timeout, response size cap, cancellation, tool-call records and spans, and arguments and results are not stored.
+
+If connecting or listing fails, the run continues with the application's own tools and logs a safe warning code. A failed call gives the model a readable tool error. GitHub's output comes from public repositories and is untrusted, so the generic instructions treat it as data.
+
 ## Host-page integration
 
 The React package does not know about Todos. The host registers `todo-list`, `todo-summary`, and `todo-item` renderers. The application marks each result `inline`, `details`, or `hidden`, so registering a renderer does not make every invocation user-visible. A result can suppress redundant assistant prose when an inline renderer fully answers the request; the client ignores that request when the renderer is unavailable. Structured tool results can emit only validated query invalidations and toasts. A processed-ID set makes effects at-most-once within the mounted conversation.

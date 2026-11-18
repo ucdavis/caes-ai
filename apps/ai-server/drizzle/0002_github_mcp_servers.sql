@@ -1,0 +1,1 @@
+ALTER TABLE "assistant_sessions" ADD COLUMN "mcp_servers" jsonb DEFAULT '[]'::jsonb NOT NULL;

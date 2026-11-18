@@ -242,6 +242,16 @@
           "items": {
             "$ref": "#/$defs/applicationToolManifest"
           }
+        },
+        "mcpServers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": [
+              "github"
+            ]
+          }
         }
       }
     },

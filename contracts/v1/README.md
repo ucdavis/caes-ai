@@ -34,6 +34,13 @@ and `deep` select those central profiles; any other string requests that exact
 model. The resolved concrete model remains subject to central and application
 allowlists.
 
+The optional `mcpServers` array names central MCP servers for the session. Its
+only allowed value is `github`. It carries names only, never a URL or credential.
+A receiver with no configured token for a requested server rejects the request
+with `mcp_server_not_configured`. A name in `tools` that collides with a
+prefixed MCP tool name (`github_search_code`, `github_get_file_contents`) is
+rejected with `invalid_tool_manifest`.
+
 ## Tool callback
 
 CAES AI sends `POST` to the fixed URL in the authenticated application

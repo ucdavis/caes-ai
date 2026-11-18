@@ -30,7 +30,8 @@ public sealed class CaesAiSessionService(
             contextTokens.Create(definition.UserReference),
             definition.Instructions,
             policy,
-            definition.Tools);
+            definition.Tools,
+            definition.McpServers is { Count: > 0 } mcpServers ? mcpServers : null);
         var session = await client.CreateSessionAsync(request, cancellationToken);
 
         return new BrowserAssistantSessionResponse(

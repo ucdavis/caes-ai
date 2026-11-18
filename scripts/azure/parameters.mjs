@@ -16,6 +16,7 @@ for (const [parameter, variable] of Object.entries({
   allowedModels: 'OPENAI_ALLOWED_MODELS',
   otelEndpoint: 'OTEL_EXPORTER_OTLP_ENDPOINT',
   otelHeaders: 'OTEL_EXPORTER_OTLP_HEADERS',
+  githubMcpToken: 'CAES_AI_GITHUB_MCP_TOKEN',
 })) {
   if (process.env[variable]) parameters[parameter] = { value: process.env[variable] };
 }

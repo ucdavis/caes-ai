@@ -24,6 +24,7 @@ export interface ServerConfig {
   databaseUrl: string;
   callbackSigningKeysPath?: string;
   allowInsecureCallbacks?: boolean;
+  githubMcpToken?: string | undefined;
 }
 
 const reasoningEfforts = new Set<ReasoningEffort>([
@@ -154,5 +155,6 @@ export function loadConfig(): ServerConfig {
       ".data/callback-signing-keys.json",
     allowInsecureCallbacks:
       process.env.CAES_AI_ALLOW_INSECURE_CALLBACKS?.trim().toLowerCase() === "true",
+    githubMcpToken: process.env.CAES_AI_GITHUB_MCP_TOKEN?.trim() || undefined,
   };
 }

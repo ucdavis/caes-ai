@@ -201,6 +201,7 @@ describe("PostgreSQL application registry", () => {
       providerRetryAttempts: 2,
       providerRetryBaseDelayMs: 0,
       databaseUrl,
+      githubMcpToken: "synthetic-github-token",
     };
     const repository = new PostgresSessionRepository(database);
     const firstProcess = new SessionStore(config, scriptedModelProvider, undefined, repository);
@@ -220,6 +221,7 @@ describe("PostgreSQL application registry", () => {
         inputSchema: { $id: "https://schemas.test/restart", type: "object" },
         dataSchema: { $id: "https://schemas.test/restart", type: "object" },
       }],
+      mcpServers: ["github"],
     });
     const secondProcess = new SessionStore(config, scriptedModelProvider, undefined, repository);
     const restored = await secondProcess.authenticate(
@@ -227,6 +229,7 @@ describe("PostgreSQL application registry", () => {
       created.accessToken,
     );
     expect(restored?.id).toBe(created.record.id);
+    expect(restored?.mcpServers).toEqual(["github"]);
     expect(restored?.tools[0]?.validateInput({})).toBe(true);
     expect((await secondProcess.authenticate(created.record.id, created.accessToken))?.tools[0]?.validateData({})).toBe(true);
     expect(restored?.userReferenceHash).toMatch(/^[a-f0-9]{64}$/);

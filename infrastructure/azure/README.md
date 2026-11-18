@@ -111,6 +111,7 @@ Secrets and preserves existing values. It does not deploy Azure resources.
 | `OPENAI_ALLOWED_MODELS` | Optional variable | Comma-separated allowlist, defaults to the default model |
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | Optional variable | Trusted OTLP HTTP/protobuf collector |
 | `OTEL_EXPORTER_OTLP_HEADERS` | Optional secret | Collector authorization headers |
+| `CAES_AI_GITHUB_MCP_TOKEN` | Optional secret | Fine-grained personal access token with public repository read access only. Leaving it empty keeps GitHub MCP off. |
 
 Providing an OTLP endpoint enables `CAES_AI_OTEL_ENABLED`; leaving it empty keeps
 telemetry export disabled. The server uses HTTP/protobuf for traces and metrics.

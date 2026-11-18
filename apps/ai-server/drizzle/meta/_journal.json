@@ -15,6 +15,13 @@
       "when": 1788541530457,
       "tag": "0001_lively_gladiator",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793826555638,
+      "tag": "0002_github_mcp_servers",
+      "breakpoints": true
     }
   ]
 }

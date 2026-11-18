@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
 
@@ -55,6 +56,53 @@ public sealed class CaesAiSessionServiceTests
         Assert.Equal(centralResponse.SessionId, result.SessionId);
         Assert.Equal("browser-token", result.AccessToken);
         Assert.Same(acceptedTool, Assert.Single(result.Tools));
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task OmitsMcpServersWhenNullOrEmpty(bool empty)
+    {
+        var client = await CreateSessionAsync(empty ? [] : null);
+
+        using var document = JsonDocument.Parse(
+            JsonSerializer.Serialize(client.LastRequest, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+
+        Assert.False(document.RootElement.TryGetProperty("mcpServers", out _));
+    }
+
+    [Fact]
+    public async Task SendsRequestedMcpServers()
+    {
+        var client = await CreateSessionAsync(["github"]);
+
+        using var document = JsonDocument.Parse(
+            JsonSerializer.Serialize(client.LastRequest, new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+
+        var server = Assert.Single(document.RootElement.GetProperty("mcpServers").EnumerateArray());
+        Assert.Equal("github", server.GetString());
+    }
+
+    private static async Task<RecordingCaesAiClient> CreateSessionAsync(IReadOnlyList<string>? mcpServers)
+    {
+        var client = new RecordingCaesAiClient(new CreateCaesAiSessionResponse(
+            CaesAiProtocol.CurrentVersion,
+            Guid.NewGuid(),
+            "browser-token",
+            new DateTimeOffset(2026, 9, 1, 12, 30, 0, TimeSpan.Zero),
+            "https://caes-ai.test/v1/sessions/id/chat",
+            new EffectiveModelPolicy("test-model", "low", "medium", ["low", "medium"]),
+            new string('a', 64),
+            []));
+        var service = new CaesAiSessionService(
+            client,
+            new StubContextTokenService("signed-context"),
+            Options.Create(new CaesAiAppOptions()));
+
+        await service.CreateSessionAsync(
+            new CaesAiSessionDefinition("user-123", "Use project tools.", [], McpServers: mcpServers),
+            CancellationToken.None);
+        return client;
     }
 
     private sealed class RecordingCaesAiClient(

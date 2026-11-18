@@ -518,6 +518,31 @@ describe("assistant components", () => {
     expect(container.querySelector("details.caes-ai-assistant__tool")).toBeNull();
   });
 
+  it("shows a central tool the session manifest does not list as a details row", async () => {
+    const output = {
+      data: { content: [{ type: "text", text: "match in v_TransactionInclusion.sql" }] },
+      uiEffects: [],
+    };
+    const client = createAssistantClient({
+      createSession: async () => testSession,
+      fetchImplementation: vi.fn<typeof fetch>(async () =>
+        eventResponse(toolEvents("github_search_code", { query: "purpose" }, output))),
+    });
+    const user = userEvent.setup();
+    render(
+      <AssistantProvider createSession={async () => testSession} client={client}>
+        <AssistantInline />
+      </AssistantProvider>,
+    );
+
+    const message = screen.getByRole("textbox", { name: "Message" });
+    await waitFor(() => expect(message).toBeEnabled());
+    await user.type(message, "Why{Enter}");
+
+    expect(await screen.findByText("Done.")).toBeVisible();
+    expect(document.querySelector('details[aria-label="Tool github_search_code"]')).not.toBeNull();
+  });
+
   it("hides the reasoning control when the effective session does not allow medium", async () => {
     const noReasoningSession: AssistantSession = {
       ...testSession,

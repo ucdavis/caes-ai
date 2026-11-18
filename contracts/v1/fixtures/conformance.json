@@ -47,6 +47,253 @@
     }
   },
   {
+    "name": "session-creation-request mcpServers github",
+    "definition": "sessionCreationRequest",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ],
+      "mcpServers": [
+        "github"
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request mcpServers empty",
+    "definition": "sessionCreationRequest",
+    "valid": true,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ],
+      "mcpServers": []
+    }
+  },
+  {
+    "name": "session-creation-request mcpServers unknown server",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ],
+      "mcpServers": [
+        "notion"
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request mcpServers duplicate",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ],
+      "mcpServers": [
+        "github",
+        "github"
+      ]
+    }
+  },
+  {
+    "name": "session-creation-request mcpServers not an array",
+    "definition": "sessionCreationRequest",
+    "valid": false,
+    "value": {
+      "protocolVersion": 1,
+      "userReference": "fixture-user",
+      "contextToken": "fixture-context-token",
+      "instructions": "Use tools for current application data.",
+      "modelPolicy": {
+        "requestedModel": null,
+        "defaultReasoningEffort": "low",
+        "maximumReasoningEffort": "medium",
+        "allowPerTurnOverride": true
+      },
+      "tools": [
+        {
+          "name": "read_items",
+          "description": "Returns the current items.",
+          "execution": "server",
+          "risk": "read",
+          "needsApproval": false,
+          "inputSchema": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "dataSchema": {
+            "type": "object",
+            "properties": {
+              "count": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "count"
+            ],
+            "additionalProperties": false
+          },
+          "presentation": {
+            "kind": "item-summary",
+            "label": "Item summary"
+          }
+        }
+      ],
+      "mcpServers": "github"
+    }
+  },
+  {
     "name": "session-creation-request missing protocolVersion",
     "definition": "sessionCreationRequest",
     "valid": false,
