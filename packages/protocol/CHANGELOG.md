@@ -1,5 +1,11 @@
 # @ucdavis/caes-ai-protocol
 
+## 0.2.0-beta.2
+
+### Minor Changes
+
+- 940685f: Add the optional `mcpServers` session field, with `github` as its only value.
+
 ## 0.2.0-beta.1
 
 ### Patch Changes
