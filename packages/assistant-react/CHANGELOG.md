@@ -1,5 +1,13 @@
 # @ucdavis/caes-ai-assistant-react
 
+## 0.2.0-beta.2
+
+### Patch Changes
+
+- Keep package versions aligned for the coordinated beta release. No change to the React package itself.
+- Updated dependencies
+  - @ucdavis/caes-ai-protocol@0.2.0-beta.2
+
 ## 0.2.0-beta.1
 
 ### Patch Changes
